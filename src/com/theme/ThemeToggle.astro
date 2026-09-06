@@ -1,0 +1,115 @@
+---
+// 컴포넌트 프론트엔드 영역 (필요 시 로직 추가 가능)
+---
+
+<!-- src/components/utils/ThemeToggle.astro --><!-- 1. 구조 설계: Tailwind의 클래스 조합으로 글래스모피즘 컨테이너 구현 -->
+<div
+    class="relative z-10 flex w-fit gap-1.5 rounded-[30px] border border-white/40 bg-white/65 p-1 shadow-sm backdrop-blur-md md:gap-1.5 md:p-1"
+    role="radiogroup"
+    aria-label="테마 선택"
+>
+    <!-- 강아지 버튼: 기본 버튼 스타일 무력화 및 상태 변경 효과 세팅 -->
+    <button
+        id="toggle-dog"
+        class="justify-content-center relative flex h-9.5 w-9.5 cursor-pointer items-center rounded-full border-none bg-transparent p-0 transition-all duration-250 ease-in-out active:scale-92 md:h-9 md:w-9"
+        role="radio"
+        aria-checked="true"
+        aria-label="강아지 테마"
+    >
+        <span
+            class="emoji transition-filter inline-block translate-z-0 text-lg opacity-50 grayscale-40 duration-250 md:text-lg"
+            aria-hidden="true">🐶</span
+        >
+    </button>
+
+    <!-- 고양이 버튼 -->
+    <button
+        id="toggle-cat"
+        class="relative flex h-9.5 w-9.5 cursor-pointer items-center justify-center rounded-full border-none bg-transparent p-0 transition-all duration-250 ease-in-out active:scale-92 md:h-9 md:w-9"
+        role="radio"
+        aria-checked="false"
+        aria-label="고양이 테마"
+    >
+        <span
+            class="emoji transition-filter inline-block translate-z-0 text-lg opacity-50 grayscale-40 duration-250 md:text-lg"
+            aria-hidden="true">🐱</span
+        >
+    </button>
+</div>
+
+<script>
+    function setupThemeToggle() {
+        const dogBtn = document.getElementById("toggle-dog");
+        const catBtn = document.getElementById("toggle-cat");
+
+        if (!dogBtn || !catBtn) return;
+
+        // 초기 설정값 가져오기 (기본값 general)
+        const currentTheme = localStorage.getItem("pet-theme") || "general";
+
+        // 💡 테마 활성화 스타일을 Tailwind 유틸리티 클래스로 교체 제어
+        const updateToggleStyle = (theme: string) => {
+            const activeClasses = ["bg-theme-bg", "shadow-md", "scale-105"];
+
+            const toggleClasses = (
+                activeBtn: HTMLElement,
+                inactiveBtn: HTMLElement
+            ) => {
+                // 활성화 버튼 스타일 주입 및 이모지 필터 제거
+                // 활성화 버튼 스타일 및 ARIA 동기화
+                activeBtn.classList.add(...activeClasses);
+                activeBtn.setAttribute("aria-checked", "true");
+                activeBtn
+                    .querySelector(".emoji")
+                    ?.classList.remove("grayscale-[40%]", "opacity-50");
+
+                // 비활성화 버튼 스타일 회수 및 이모지 필터 주입
+                // 비활성화 버튼 스타일 및 ARIA 동기화
+                inactiveBtn.classList.remove(...activeClasses);
+                inactiveBtn.setAttribute("aria-checked", "false");
+                inactiveBtn
+                    .querySelector(".emoji")
+                    ?.classList.add("grayscale-[40%]", "opacity-50");
+            };
+
+            if (theme === "cat") {
+                toggleClasses(catBtn, dogBtn);
+            } else {
+                // dog 또는 general 상태일 때는 강아지 활성화
+                toggleClasses(dogBtn, catBtn);
+            }
+        };
+
+        const applyTheme = (targetTheme: string) => {
+            document.documentElement.setAttribute("data-theme", targetTheme);
+            localStorage.setItem("pet-theme", targetTheme);
+            updateToggleStyle(targetTheme);
+        };
+
+        // 기존 이벤트를 중복 등록하지 않도록 처리
+        // dogBtn.onclick = () => applyTheme('dog');
+        // catBtn.onclick = () => applyTheme('cat');
+
+        // 💡 핵심: e.stopPropagation()으로 상위 화면 클릭 이벤트(화면 시작 등) 전파 방지!
+        dogBtn.onclick = (e) => {
+            e.stopPropagation();
+            applyTheme("dog");
+        };
+
+        catBtn.onclick = (e) => {
+            e.stopPropagation();
+            applyTheme("cat");
+        };
+
+        // 진입 및 페이지 로드 시 상태 동기화 실행
+        updateToggleStyle(currentTheme);
+    }
+
+    // Astro 생명주기 대응 스크립트 실행 등록
+    if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", setupThemeToggle);
+    } else {
+        setupThemeToggle();
+    }
+    document.addEventListener("astro:after-swap", setupThemeToggle);
+</script>

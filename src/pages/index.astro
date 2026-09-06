@@ -1,17 +1,158 @@
 ---
+import { Image } from "astro:assets";
+import Layout from "@/com/layout/Layout.astro";
+import GuideBubble from "@/com/alert/CloudBubbleCSS.astro";
+import DesktopScreen from "@/com/screen/DesktopScreen.astro";
 
+const title = "Astro";
+const description = "Astro My....";
 ---
 
-<html lang="en">
-	<head>
-		<meta charset="utf-8" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<link rel="icon" href="/favicon.ico" />
-		<meta name="viewport" content="width=device-width" />
-		<meta name="generator" content={Astro.generator} />
-		<title>Astro</title>
-	</head>
-	<body>
-		<h1>Astro Page....</h1>
-	</body>
-</html>
+<Layout title={title} description={description}>
+    <!-- 1. 로딩 화면 컨테이너 (1200px 제약을 깨고 전체 화면을 채움) -->
+    <div id="loading-screen">
+        <!-- 글로벌 플래시 오버레이, 전체화면 -->
+        <div
+            class="global-flash-overlay pointer-events-none fixed inset-0 z-[100006] bg-white opacity-0 transition-opacity duration-500"
+        >
+        </div>
+
+        <!-- daisyUI 기반 안내 말풍선 컴포넌트 -->
+        <GuideBubble id="audio-guide-bubble" />
+
+        <!-- 추출하여 단독으로 배치한 DesktopScreen -->
+        <div id="app-view-container" class="min-h-screen w-full">
+            <DesktopScreen />
+        </div>
+    </div>
+
+    <!-- 2. 실제 메인 콘텐츠 영역 (자동으로 1200px 중앙 정렬 적용됨) -->
+    <div id="main-content" class="hidden">
+        <header>
+            <h1>펫줍.닷컴 메인 페이지 콘텐츠</h1>
+        </header>
+        <main>
+            <p>여기는 효과가 끝난 뒤 나타나는 1200px 너비의 메인 화면입니다.</p>
+        </main>
+    </div>
+</Layout>
+<script is:inline>
+    function initializeApp() {
+        console.log("=== 🐶 펫줍 서비스 초기화 시작 (PC 데스크톱 전용) ===");
+
+        // 오디오 파일 설정
+        const shutterSound = new Audio("/sound/shutter.mp3");
+        shutterSound.preload = "auto";
+
+        const loadingScreen = document.getElementById("loading-screen");
+        const mainContent = document.getElementById("main-content");
+        const flashOverlay = document.querySelector(".global-flash-overlay");
+        const guideBubble = document.getElementById("audio-guide-bubble");
+        const toggleWrapper =
+            document.getElementById("absolute-theme-wrapper") ||
+            document.querySelector(".top-theme-toggle");
+
+        let flashCount = 0;
+        let flashInterval;
+        let isStarted = false;
+
+        // 플래시 및 화면 전환 트리거 함수
+        function triggerFlash() {
+            if (!flashOverlay) return;
+            flashCount++;
+
+            // 플래시가 3번 터진 후 전체 로딩 창을 걷어내고 메인화면을 보여줌
+            if (flashCount > 3) {
+                clearInterval(flashInterval);
+                flashOverlay.remove();
+
+                // 셔터 효과 완료 후 메인화면으로 정식 전환
+                if (loadingScreen && mainContent) {
+                    loadingScreen.style.opacity = "0";
+                    loadingScreen.style.transition = "opacity 0.5s ease";
+                    setTimeout(() => {
+                        loadingScreen.style.display = "none";
+                        mainContent.classList.remove("hidden");
+                    }, 500);
+                }
+                return;
+            }
+
+            shutterSound.currentTime = 0;
+            shutterSound
+                .play()
+                .catch((err) =>
+                    console.error("❌ 오디오 재생 거부:", err.name)
+                );
+
+            // opacity 조절로 플래시 효과 표현
+            flashOverlay.classList.remove("opacity-0");
+            flashOverlay.classList.add("opacity-100");
+
+            setTimeout(() => {
+                flashOverlay.classList.remove("opacity-100");
+                flashOverlay.classList.add("opacity-0");
+            }, 200);
+        }
+
+        const startEffect = (e) => {
+            if (isStarted) return;
+            isStarted = true;
+
+            if (guideBubble) {
+                // 커스텀 fade-out 스타일 적용
+                guideBubble.classList.add("guide-bubble-fade-out");
+                setTimeout(() => guideBubble.remove(), 400);
+            }
+
+            triggerFlash();
+            flashInterval = setInterval(triggerFlash, 3000);
+
+            window.removeEventListener("click", startEffect);
+        };
+
+        // 화면 클릭 시 셔터 이벤트 연동
+        window.addEventListener("click", startEffect);
+
+        if (toggleWrapper) {
+            toggleWrapper.addEventListener(
+                "click",
+                (e) => {
+                    if (!isStarted) startEffect(e);
+                },
+                true
+            );
+        }
+    }
+
+    // 초기 로드 및 Astro 페이지 전환 시 실행
+    initializeApp();
+    document.addEventListener("astro:page-load", initializeApp);
+</script>
+
+<style>
+    /* ==========================================================================
+     로딩 스크린 레이아웃 및 레이어 순서 정리
+     ========================================================================== */
+    #loading-screen {
+        position: fixed; /* 브라우저 창 기준으로 화면 고정 */
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        background-color: var(--background-color, #ffffff);
+        z-index: 100000; /* 메인 페이지보다 위에 표시 */
+    }
+
+    /* 메인 콘텐츠 초기 상태 숨김 */
+    #main-content {
+        transition: opacity 0.5s ease;
+    }
+
+    .hidden {
+        opacity: 0;
+        position: absolute;
+        width: 100%;
+        pointer-events: none;
+    }
+</style>

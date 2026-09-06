@@ -1,0 +1,175 @@
+[
+    {
+        "category_id": "CAT-001",
+        "category_name": "주식 및 간식",
+        "items": [
+            {
+                "item_id": "FOOD-001",
+                "item_name": "연령별 맞춤 건사료",
+                "type": "사료"
+            },
+            {
+                "item_id": "FOOD-002",
+                "item_name": "영양 가득 습식사료/캔",
+                "type": "사료"
+            },
+            {
+                "item_id": "TREAT-001",
+                "item_name": "치석 제거 기능성 껌",
+                "type": "간식"
+            },
+            {
+                "item_id": "TREAT-002",
+                "item_name": "훈련 보상용 동결건조 트릿",
+                "type": "간식"
+            }
+        ]
+    },
+    {
+        "category_id": "CAT-002",
+        "category_name": "위생 및 배변 용품",
+        "items": [
+            {
+                "item_id": "HYG-001",
+                "item_name": "흡수력 좋은 배변 패드",
+                "type": "배변용품"
+            },
+            {
+                "item_id": "HYG-002",
+                "item_name": "미끄럼 방지 배변판",
+                "type": "배변용품"
+            },
+            {
+                "item_id": "HYG-003",
+                "item_name": "고양이용 두부모래/벤토나이트",
+                "type": "배변용품"
+            },
+            {
+                "item_id": "HYG-004",
+                "item_name": "휴대용 풉백(배변 봉투)",
+                "type": "산책용품"
+            }
+        ]
+    },
+    {
+        "category_id": "CAT-003",
+        "category_name": "미용 및 케어 제품",
+        "items": [
+            {
+                "item_id": "CARE-001",
+                "item_name": "죽은 털 제거 슬리커 브러시",
+                "type": "미용"
+            },
+            {
+                "item_id": "CARE-002",
+                "item_name": "저자극 반려동물 샴푸/린스",
+                "type": "목욕"
+            },
+            {
+                "item_id": "CARE-003",
+                "item_name": "안전 혈관 가드 발톱깎이",
+                "type": "위생"
+            },
+            {
+                "item_id": "CARE-004",
+                "item_name": "반려동물 전용 치약 및 칫솔",
+                "type": "위생"
+            }
+        ]
+    },
+    {
+        "category_id": "CAT-004",
+        "category_name": "하우스 및 이동 용품",
+        "items": [
+            {
+                "item_id": "HOME-001",
+                "item_name": "사계절용 극세사 하우스 방석",
+                "type": "하우스"
+            },
+            {
+                "item_id": "HOME-002",
+                "item_name": "항공 승인 크레이트 켄넬",
+                "type": "이동장"
+            },
+            {
+                "item_id": "HOME-003",
+                "item_name": "공간 분리용 안전 울타리/안전문",
+                "type": "안전"
+            }
+        ]
+    },
+    {
+        "category_id": "CAT-005",
+        "category_name": "산책 및 놀이 용품",
+        "items": [
+            {
+                "item_id": "PLAY-001",
+                "item_name": "H형 편안한 가슴줄(하네스)",
+                "type": "산책"
+            },
+            {
+                "item_id": "PLAY-002",
+                "item_name": "QR코드 각인 미아방지 인식표",
+                "type": "산책"
+            },
+            {
+                "item_id": "PLAY-003",
+                "item_name": "스트레스 해소 노즈워크 장난감",
+                "type": "놀이"
+            },
+            {
+                "item_id": "PLAY-004",
+                "item_name": "고양이 취향 저격 깃털 낚싯대",
+                "type": "놀이"
+            }
+        ]
+    },
+    {
+        "id": "g001",
+        "name": "프리미엄 연어 건식사료",
+        "category": "건식사료",
+        "price": 25000
+    },
+    {
+        "id": "g002",
+        "name": "닭고기 야채 습식사료",
+        "category": "습식사료",
+        "price": 3200
+    },
+    {
+        "id": "g003",
+        "name": "블링블링 레이스 드레스",
+        "category": "의류",
+        "price": 18900
+    },
+    {
+        "id": "g004",
+        "name": "소고기 져키 간식",
+        "category": "간식",
+        "price": 5500
+    },
+    {
+        "id": "g005",
+        "name": "폭신한 솜사탕 방석",
+        "category": "용품",
+        "price": 22000
+    },
+    {
+        "id": "g006",
+        "name": "칠면조 고단백 건식사료",
+        "category": "건식사료",
+        "price": 28000
+    },
+    {
+        "id": "g007",
+        "name": "참치맛 영양 습식사료",
+        "category": "습식사료",
+        "price": 3500
+    },
+    {
+        "id": "g008",
+        "name": "여름용 시원한 쿨 드레스",
+        "category": "의류",
+        "price": 21000
+    }
+]

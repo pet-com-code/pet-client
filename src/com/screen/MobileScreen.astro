@@ -1,0 +1,55 @@
+---
+import { Image } from "astro:assets";
+import Logo from "@/assets/img/logo-main.png";
+import BackGround from "@/assets/img/mobile_back.png";
+import ThemeToggle from "@/components/ThemeToggle.astro";
+---
+
+<div
+    id="mobile-layer"
+    class="relative flex min-h-screen w-full flex-col justify-between bg-cover bg-center bg-no-repeat p-5 text-center"
+    style={`background-image: url('${BackGround.src}');`}
+>
+    <!-- 우측 상단 테마 토글 (glass 효과 활용) -->
+    <div
+        class="glass absolute top-5 right-5 z-10 rounded-full border border-white/50 p-1"
+    >
+        <ThemeToggle />
+    </div>
+
+    <!-- 메인 로고 영역 -->
+    <div class="mt-16 flex justify-center">
+        <Image
+            src={Logo}
+            alt="펫줍.닷컴"
+            width={750}
+            height={284}
+            class="h-auto w-full max-w-[750px] object-contain drop-shadow-md"
+        />
+    </div>
+
+    <!-- 하단 콘텐츠 영역 (daisyUI btn 활용) -->
+    <div class="mt-auto mb-12 flex flex-col items-center">
+        <!-- 앱 다운로드 버튼 모음 -->
+        <div class="flex w-full max-w-[260px] flex-col gap-3.5">
+            <!-- daisyUI의 btn 클래스를 사용하여 테마 배경색 및 터치 애니메이션 자동 적용 -->
+            <button
+                class="btn btn-primary bg-theme-main text-shadow-theme-bg-light hover:bg-theme-hover w-full rounded-2xl border-0 py-6 font-bold shadow-md transition-transform active:scale-95"
+            >
+                Google Play
+            </button>
+            <button
+                class="btn btn-primary bg-theme-main text-shadow-theme-bg-light hover:bg-theme-hover w-full rounded-2xl border-0 py-6 font-bold shadow-md transition-transform active:scale-95"
+            >
+                App Store
+            </button>
+        </div>
+
+        <!-- 안내 메시지 -->
+        <h4 class="text-text-main mt-8 text-lg font-semibold drop-shadow-sm">
+            잠시만 기다려 주세요. 펫~ 줍는 중.. <span
+                class="inline-block translate-y-0.5 text-xl">📷</span
+            >
+        </h4>
+    </div>
+</div>

@@ -1,0 +1,63 @@
+---
+// src/components/CustomAlert.astro
+interface Props {
+    type: "success" | "error" | "warning" | "info"; // 알림 타입 (기본값: info)
+    soundSrc?: string; // (선택) 클릭/동작 시 발생할 소리 경로
+}
+
+const { type, soundSrc = `/sound/${type}.mp3` } = Astro.props;
+
+// 타입별 기본 이모지 아이콘 지정 (아이콘 라이브러리를 쓰신다면 <i> 태그 클래스로 변경 가능)
+const iconMap = {
+    success: "✅",
+    error: "🚨",
+    warning: "⚠️",
+    info: "ℹ️"
+};
+---
+
+<!-- 스크립트 접근용 클래스 조합 선언 -->
+<div class={`custom-alert alert-trigger-${type} ${type}`} data-sound={soundSrc}>
+    <i>{iconMap[type]}</i>
+    <!-- 실시간 메시지 교체를 위해 클래스 추가 -->
+    <span class="alert-message"></span>
+</div>
+
+<style>
+    .custom-alert {
+        position: fixed;
+        top: -100px;
+        left: 50%;
+        transform: translateX(-50%);
+        color: white;
+        padding: 15px 30px;
+        border-radius: 8px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        transition: top 0.5s ease;
+        z-index: 9999;
+    }
+
+    .custom-alert.show {
+        top: 20px;
+    }
+
+    .custom-alert i {
+        font-size: 20px;
+    }
+
+    .custom-alert.success {
+        background-color: #2ecc71;
+    }
+    .custom-alert.error {
+        background-color: #e74c3c;
+    }
+    .custom-alert.warning {
+        background-color: #f1c40f;
+    }
+    .custom-alert.info {
+        background-color: #3498db;
+    }
+</style>

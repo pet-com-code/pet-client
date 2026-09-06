@@ -1,0 +1,67 @@
+---
+// src/screen/Desk.astro
+import { Image } from "astro:assets";
+import myImage from "@/assets/img/logo-main.png";
+import ThemeToggle from "@/com/theme/ThemeToggleCSS.astro";
+---
+
+<div class="desktop-layout">
+    <!-- PC 전용 테마 버튼 위치 -->
+    <div id="pc-theme-wrapper">
+        <ThemeToggle />
+    </div>
+
+    <!-- 카드 예시 -->
+    <div
+        class="shadow-card"
+        style="padding: 2rem; margin: 1rem; border-radius: 0.5rem; background: var(--color-base-200);"
+    >
+        <h2>CloudFlare Platform : Astro, Hono, Drizzle, Zod</h2>
+        <p>
+            [GitHub] Client: https://github.com/pet-com-code/pet-client.git,
+            Server : https://github.com/pet-com-code/pet-server.git
+        </p>
+    </div>
+
+    <!-- PC 전용 로고 이미지 (이제 모바일과 섞이지 않고 단독으로 존재) -->
+    <div class="pc-content">
+        <Image
+            src={myImage}
+            alt="펫줍.닷컴"
+            width={750}
+            height={284}
+            class="clean-image"
+        />
+    </div>
+</div>
+
+<style>
+    .desktop-layout {
+        position: relative;
+        width: 100%;
+        min-height: 100vh;
+    }
+
+    #pc-theme-wrapper {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 100005;
+        pointer-events: auto;
+    }
+
+    .pc-content {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+    }
+
+    .clean-image {
+        display: block;
+        border: none !important;
+        outline: none !important;
+        box-shadow: none !important;
+        background: transparent;
+    }
+</style>

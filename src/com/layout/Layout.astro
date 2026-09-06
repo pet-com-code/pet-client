@@ -1,0 +1,109 @@
+---
+import "@/css/normalize.css";
+import "@/css/theme.css";
+import { SITE_CONFIG } from "@/lib/site";
+
+interface Props {
+    title?: string;
+    description?: string;
+}
+
+const { title, description } = Astro.props;
+
+// 2. 기본값 정의 (브랜드 상수)
+const pageTitle = title ? `${title} | ${SITE_CONFIG.brand}` : SITE_CONFIG.brand;
+const ogTitle = title || SITE_CONFIG.brand;
+const finalDescription = description || SITE_CONFIG.description;
+
+// baseUrl 생성 안정화, site 설정이 유효할 때만 URL 인스턴스 생성
+const origin = Astro.site?.origin ?? Astro.url.origin;
+const ogImage = new URL(SITE_CONFIG.defaultImage, origin).href;
+const canonicalUrl = new URL(Astro.url.pathname, origin).href;
+
+// 서버 측 테마 설정
+const savedThemeCookie = Astro.cookies.get(SITE_CONFIG.theme.cookieKey)?.value;
+const initialTheme = savedThemeCookie || SITE_CONFIG.theme.defaultTheme;
+---
+
+<!doctype html>
+<html lang="ko" data-theme={initialTheme}>
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <link rel="icon" type="image/png" href="/favicon.png" />
+        <link rel="shortcut icon" href="/favicon.ico" />
+
+        <link rel="canonical" href={canonicalUrl} />
+        <title>{pageTitle}</title>
+        <meta name="description" content={finalDescription} />
+        <meta name="robots" content="index, follow" />
+
+        <!-- 오픈 그래프 (OG) & 트위터 메타 태그 -->
+        <meta property="og:type" content="website" />
+        <meta property="og:site_name" content={SITE_CONFIG.brand} />
+        <meta property="og:url" content={canonicalUrl} />
+        <meta property="og:title" content={ogTitle} />
+        <meta property="og:description" content={finalDescription} />
+        <meta property="og:image" content={ogImage} />
+        <meta property="og:image:alt" content={pageTitle} />
+
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={ogTitle} />
+        <meta name="twitter:description" content={finalDescription} />
+        <meta name="twitter:image" content={ogImage} />
+
+        <!-- 클라이언트 테마 복원 스크립트 (SSR 쿠키 및 LocalStorage 동기화) -->
+        <!-- 클라이언트 테마 동기화 스크립트 -->
+        <script
+            is:inline
+            define:vars={{
+                // 브라우저 쿠키(Cookie)에 테마 이름을 저장하고 불러올 때 사용하는 식별용 이름(Key)
+                COOKIE_KEY: SITE_CONFIG.theme.cookieKey, // COOKIE_KEY ("pet-theme")
+                // 브라우저 로컬 스토리지(LocalStorage)에 테마 상태를 저장할 때 사용하는 식별용 이름(Key)
+                STORAGE_KEY: SITE_CONFIG.theme.storageKey, // STORAGE_KEY ("pet-theme")
+                // 사용자가 사이트에 처음 방문했거나 저장된 테마 정보(쿠키/로컬스토리지)가 없을 때 적용할 기본 테마 값(Value)
+                DEFAULT_THEME: SITE_CONFIG.theme.defaultTheme
+            }}
+        >
+            function getSavedTheme() {
+                const match = document.cookie.match(
+                    new RegExp(`(?:^|; )${COOKIE_KEY}=([^;]*)`)
+                );
+                if (match) return match[1];
+                return localStorage.getItem(STORAGE_KEY) || DEFAULT_THEME;
+            }
+
+            const savedTheme = getSavedTheme();
+            document.documentElement.setAttribute("data-theme", savedTheme);
+        </script>
+    </head>
+    <body>
+        <div class="general-page">
+            <slot />
+        </div>
+    </body>
+</html>
+<style>
+    /* Layout 전용 Body 기본 설정 */
+    body {
+        display: flex;
+        flex-direction: column;
+        min-height: 100vh;
+    }
+
+    /* 일반 서브 페이지들을 위한 1200px 중앙 정렬 스타일 */
+    .general-page {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 10px; /* 모바일 환경 최소 여백 확보 */
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+    /* 💡 추가된 부분 (PC 화면): 화면 폭이 1200px 이상이 되면 좌우 여백을 없앱니다. */
+    @media (min-width: 1200px) {
+        .general-page {
+            padding: 0 0; /* 또는 padding: 0; */
+        }
+    }
+</style>

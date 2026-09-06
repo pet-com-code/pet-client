@@ -1,0 +1,76 @@
+/* src/css/theme.css */
+
+/* 1. 기본 테마 (general) */
+:root,
+[data-theme="general"] {
+    --color-primary: #7f8c8d;
+    --color-primary-content: #ffffff;
+    --color-base-100: #f8f9fa; /* 기본 배경색 (매우 밝은 회색) */
+    --color-base-200: #e9ecef; /* 컨테이너 및 카드 배경색 */
+    --color-base-content: #2c3e50;
+
+    --custom-hover: #616a6b;
+    --custom-shadow: 0 10px 25px -5px rgba(127, 140, 141, 0.12);
+    --custom-shadow-hover: 0 15px 30px -5px rgba(127, 140, 141, 0.22);
+}
+
+/* 2. 강아지 테마 (dog) */
+[data-theme="dog"] {
+    --color-primary: #4a90e2;
+    --color-primary-content: #ffffff;
+    --color-base-100: #eef5ff; /* ⭐ 수정: 강아지 테마의 은은한 블루 빛 배경색 */
+    --color-base-200: #d8e6ff; /* ⭐ 수정: 카드/컴포넌트가 돋보이도록 흰색 배치 */
+    --color-base-content: #1e293b;
+
+    --custom-hover: #357abd;
+    --custom-shadow: 0 10px 25px -5px rgba(74, 144, 226, 0.12);
+    --custom-shadow-hover: 0 15px 30px -5px rgba(74, 144, 226, 0.22);
+}
+
+/* 3. 고양이 테마 (cat) */
+[data-theme="cat"] {
+    --color-primary: #ffa6c9;
+    --color-primary-content: #332222;
+    --color-base-100: #fff0f3; /* ⭐ 수정: 고양이 테마의 은은한 핑크 빛 배경색 */
+    --color-base-200: #ffe0e6; /* ⭐ 수정: 카드/컴포넌트가 돋보이도록 흰색 배치 */
+    --color-base-content: #332222;
+
+    --custom-hover: #ec8fa7;
+    --custom-shadow: 0 10px 25px -5px rgba(255, 166, 201, 0.18);
+    --custom-shadow-hover: 0 15px 30px -5px rgba(255, 166, 201, 0.28);
+}
+
+/* 4. 공통 컴포넌트 클래스 정의 */
+body {
+    background-color: var(
+        --color-base-100
+    ); /* 위에서 수정된 테마별 배경색이 적용됩니다 */
+    color: var(--color-base-content);
+    margin: 0; /* 기본 여백 제거 */
+    transition:
+        background-color 0.3s ease,
+        color 0.3s ease;
+}
+
+.btn-theme {
+    background-color: var(--color-primary);
+    color: var(--color-primary-content);
+    border-radius: 0.5rem;
+    padding: 0.5rem 1rem;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.btn-theme:hover {
+    background-color: var(--custom-hover);
+}
+
+.shadow-card {
+    box-shadow: var(--custom-shadow);
+    transition: box-shadow 0.2s ease;
+}
+
+.shadow-card:hover {
+    box-shadow: var(--custom-shadow-hover);
+}
