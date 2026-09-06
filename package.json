@@ -16,5 +16,13 @@
   },
   "allowScripts": {
     "esbuild": true
+  },
+  "devDependencies": {
+    "@astrojs/cloudflare": "^14.3.0",
+    "@astrojs/sitemap": "^3.7.4",
+    "@cloudflare/workers-types": "^5.20260903.1",
+    "prettier": "^3.9.6",
+    "prettier-plugin-astro": "^0.14.1",
+    "wrangler": "^4.129.0"
   }
 }
