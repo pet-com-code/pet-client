@@ -6,6 +6,21 @@
 // 영문 주소: https://펫.닷컴/shop/goods
 // 인코딩된 주소 (SNS에 공유될 때): https://펫.닷컴/%EC%8A%88%ED%95%91/...
 
+// [입력] "shop/goods"
+//   ↓
+// [1단계: 분하 및 변환] 
+// "shop"  ──(ALIAS_MAP)──> "쇼핑"
+// "supplies" ──(ALIAS_MAP)──> "용품"
+// 결과: ['쇼핑', '용품']
+//   ↓
+// [2단계: ROUTE_MAP 탐색]
+// ROUTE_MAP['쇼핑'] 존재함! ──> ROUTE_MAP['쇼핑']['용품'] 존재함!
+//   ↓
+// [3단계: 결과 반환]
+// { view: Supplies, description: "필수 반려용품" } 정보 반환!
+//   ↓
+// [Astro 파일] Supplies.astro 화면을 브라우저에 렌더링!
+
 import { ROUTE_MAP, ALIAS_MAP, type RouteConfig } from "@/lib/routes/routeMap";
 
 export function resolveRoute(
@@ -37,7 +52,7 @@ export function resolveRoute(
     for (const segment of segments) {
         // segments :  // "shop/food" -> ['쇼핑', '음식']
         if (current && typeof current === "object" && segment in current) {
-            current = current[segment];
+            current = current[segment]; // ROUTE_MAP['쇼핑']['음식']
         } else {
             return null; // 경로 불일치 (404)
         }

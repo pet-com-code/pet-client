@@ -1,3 +1,781 @@
-<div>
-    <h1>Sign Page Astro</h1>
+---
+import CustomAlert from "@/com/alert/CustomAlert.astro";
+
+// 💡 Props 및 isLogin / isSignUp 제어 변수를 모두 제거합니다.
+// 현재 요청된 URL 경로를 파악합니다. (/인증/회원가입 또는 /auth/signup 인지 확인)
+const pathname = decodeURIComponent(Astro.url.pathname).toLowerCase();
+const isSignUpRoute =
+    pathname.includes("회원가입") || pathname.includes("signup");
+
+// URL 경로에 따라 초기 테마 및 active 클래스 자동 설정
+const initialTheme = isSignUpRoute ? "cat" : "dog";
+---
+
+<!-- isSignUpRoute 상태에 따라 초기 active 클래스와 data-theme 동적 지정 --><!-- active 클래스 및 data-theme 동적 지정 유지 --><!-- AuthCard.astro -->
+<div id="authCard" class="auth-card" data-theme="dog">
+    <!-- 커스텀 알림 영역 -->
+    <div
+        class="custom-alert alert-trigger-success"
+        data-sound="/sounds/success.mp3"
+    >
+        <span class="alert-message"></span>
+    </div>
+    <div
+        class="custom-alert alert-trigger-error"
+        data-sound="/sounds/error.mp3"
+    >
+        <span class="alert-message"></span>
+    </div>
+    <div
+        class="custom-alert alert-trigger-warning"
+        data-sound="/sounds/warning.mp3"
+    >
+        <span class="alert-message"></span>
+    </div>
+    <div class="custom-alert alert-trigger-info" data-sound="/sounds/info.mp3">
+        <span class="alert-message"></span>
+    </div>
+
+    <div class="forms-container">
+        <!-- [ 로그인 폼 ] -->
+        <form id="signinForm" class="form-box sign-in-form">
+            <h2 class="form-title">로그인</h2>
+
+            <div class="input-group">
+                <input
+                    type="email"
+                    name="email"
+                    placeholder="이메일"
+                    class="input-field"
+                    required
+                />
+                <i class="bx bxs-user input-icon"></i>
+            </div>
+
+            <div class="input-group">
+                <input
+                    type="password"
+                    name="password"
+                    placeholder="비밀번호"
+                    class="input-field"
+                    required
+                />
+                <i class="bx bxs-lock-alt input-icon"></i>
+            </div>
+
+            <button type="submit" class="btn btn-submit">로그인</button>
+
+            <div class="sns-container">
+                <p class="sns-title">또는 SNS 계정으로 시작하기</p>
+                <div class="sns-buttons">
+                    <a href="/auth/google" class="sns-btn google-tab">
+                        <svg
+                            class="sns-icon"
+                            xmlns="http://www.w3.org/2000/svg"
+                            viewBox="0 0 48 48"
+                        >
+                            <path
+                                fill="#EA4335"
+                                d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"
+                            ></path>
+                            <path
+                                fill="#4285F4"
+                                d="M46.5 24c0-1.61-.15-3.16-.42-4.69H24v8.88h12.62c-.54 2.91-2.18 5.38-4.64 7.04l7.17 5.56C43.34 36.29 46.5 30.73 46.5 24z"
+                            ></path>
+                            <path
+                                fill="#FBBC05"
+                                d="M10.54 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.98-6.19z"
+                            ></path>
+                            <path
+                                fill="#34A552"
+                                d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.17-5.56c-1.99 1.33-4.53 2.12-8.72 2.12-6.26 0-11.57-4.22-13.46-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"
+                            ></path>
+                        </svg>
+                        <span>Google</span>
+                    </a>
+                    <a href="/auth/kakao" class="sns-btn kakao-tab">
+                        <svg
+                            class="sns-icon"
+                            xmlns="http://www.w3.org/2000/svg"
+                            viewBox="0 0 24 24"
+                        >
+                            <path
+                                fill="#191919"
+                                d="M12 3c-5.523 0-10 3.582-10 8 0 2.947 2.014 5.525 5.022 6.941l-1.02 3.736c-.126.46.38.835.753.587l4.439-2.956c.263.018.53.032.806.032 5.523 0 10-3.582 10-8s-4.477-8-10-8z"
+                            ></path>
+                        </svg>
+                        <span>Kakao</span>
+                    </a>
+                </div>
+            </div>
+        </form>
+
+        <!-- [ 회원가입 폼 ] -->
+        <form id="signupForm" class="form-box signup sign-up-form">
+            <h2 class="form-title">회원가입</h2>
+
+            <div class="input-group">
+                <input
+                    type="email"
+                    name="email"
+                    placeholder="이메일"
+                    class="input-field"
+                    required
+                />
+                <i class="bx bxs-user input-icon"></i>
+            </div>
+
+            <div class="input-group">
+                <input
+                    type="text"
+                    name="name"
+                    placeholder="이름"
+                    class="input-field"
+                    required
+                />
+                <i class="bx bxs-user input-icon"></i>
+            </div>
+
+            <div class="input-group">
+                <input
+                    type="password"
+                    name="password"
+                    placeholder="비밀번호"
+                    class="input-field"
+                    required
+                />
+                <i class="bx bxs-lock-alt input-icon"></i>
+            </div>
+
+            <div class="input-group">
+                <input
+                    type="password"
+                    name="repassword"
+                    placeholder="비밀번호 확인"
+                    class="input-field"
+                    required
+                />
+                <i class="bx bxs-lock-alt input-icon"></i>
+            </div>
+
+            <button type="submit" class="btn btn-submit">가입하기</button>
+
+            <div class="sns-container">
+                <p class="sns-title">또는 SNS 계정으로 시작하기</p>
+                <div class="sns-buttons">
+                    <a
+                        href="/auth/google"
+                        id="googleLoginBtn"
+                        class="sns-btn google-tab"
+                    >
+                        <svg
+                            class="sns-icon"
+                            xmlns="http://www.w3.org/2000/svg"
+                            viewBox="0 0 48 48"
+                        >
+                            <path
+                                fill="#EA4335"
+                                d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"
+                            ></path>
+                            <path
+                                fill="#4285F4"
+                                d="M46.5 24c0-1.61-.15-3.16-.42-4.69H24v8.88h12.62c-.54 2.91-2.18 5.38-4.64 7.04l7.17 5.56C43.34 36.29 46.5 30.73 46.5 24z"
+                            ></path>
+                            <path
+                                fill="#FBBC05"
+                                d="M10.54 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.98-6.19z"
+                            ></path>
+                            <path
+                                fill="#34A552"
+                                d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.17-5.56c-1.99 1.33-4.53 2.12-8.72 2.12-6.26 0-11.57-4.22-13.46-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"
+                            ></path>
+                        </svg>
+                        <span>Google</span>
+                    </a>
+                    <a
+                        href="/auth/kakao"
+                        id="kakaoLoginBtn"
+                        class="sns-btn kakao-tab"
+                    >
+                        <svg
+                            class="sns-icon"
+                            xmlns="http://www.w3.org/2000/svg"
+                            viewBox="0 0 24 24"
+                        >
+                            <path
+                                fill="#191919"
+                                d="M12 3c-5.523 0-10 3.582-10 8 0 2.947 2.014 5.525 5.022 6.941l-1.02 3.736c-.126.46.38.835.753.587l4.439-2.956c.263.018.53.032.806.032 5.523 0 10-3.582 10-8s-4.477-8-10-8z"
+                            ></path>
+                        </svg>
+                        <span>Kakao</span>
+                    </a>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <!-- 토글 오버레이 패널 -->
+    <div class="toggle-box">
+        <div class="toggle-panel toggle-left">
+            <h1>안녕하세요! 🐶</h1>
+            <p>아직 계정이 없으신가요?</p>
+            <button type="button" class="btn btn-toggle signup-btn"
+                >회원가입</button
+            >
+        </div>
+
+        <div class="toggle-panel toggle-right">
+            <h1>다시 오셨군요! 🐱</h1>
+            <p>이미 계정이 있으신가요?</p>
+            <button type="button" class="btn btn-toggle signin-btn"
+                >로그인</button
+            >
+        </div>
+    </div>
 </div>
+
+<style>
+    /* ====================================================
+   AuthCard 메인 레이아웃 및 테마 변수 매핑
+   ==================================================== */
+
+    /* [ 화면 중앙 고정 레이아웃 ] */
+    .auth-card {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        z-index: 100;
+
+        width: 850px;
+        max-width: calc(100vw - 20px);
+        height: 550px;
+        max-height: calc(100vh - 20px);
+
+        overflow: hidden;
+        border-radius: 30px;
+
+        /* 🌟 theme.css의 변수와 일치시킴 */
+        background-color: var(--color-base-100);
+        color: var(--color-base-content);
+        box-shadow: var(--custom-shadow);
+        transition:
+            background-color 0.5s ease,
+            color 0.5s ease,
+            box-shadow 0.5s ease;
+    }
+
+    .auth-card:hover {
+        box-shadow: var(--custom-shadow-hover);
+    }
+
+    /* [ 폼 폼 영역 기본 설정 ] */
+    .form-box {
+        position: absolute;
+        right: 0;
+        top: 0;
+        z-index: 1;
+        display: flex;
+        height: 100%;
+        width: 50%;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 2.5rem;
+        text-align: center;
+
+        /* 카드 내부 폼 배경은 base-100 또는 base-200 매핑 */
+        background-color: var(--color-base-100);
+        transition: all 0.6s ease-in-out;
+    }
+
+    .form-box.signup {
+        visibility: hidden;
+        opacity: 0;
+    }
+
+    .form-title {
+        margin-bottom: 1rem;
+        font-size: 1.875rem;
+        font-weight: 800;
+        color: var(--color-base-content);
+        transition: color 0.5s ease;
+    }
+
+    /* [ 인풋 입력창 ] */
+    .input-group {
+        position: relative;
+        margin: 0.4rem 0;
+        width: 100%;
+    }
+
+    .input-field {
+        width: 100%;
+        height: 3rem;
+        padding: 0 2.75rem 0 1rem;
+        border-radius: 0.5rem;
+        border: 1px solid var(--color-base-200);
+        background-color: #ffffff; /* 입력 필드는 깔끔한 흰색 유지 */
+        font-size: 0.875rem;
+        font-weight: 500;
+        color: var(--color-base-content);
+        outline: none;
+        box-sizing: border-box;
+        transition:
+            border-color 0.3s ease,
+            color 0.5s ease;
+    }
+
+    .input-field:focus {
+        border-color: var(--color-primary);
+    }
+
+    .input-icon {
+        position: absolute;
+        top: 50%;
+        right: 1rem;
+        transform: translateY(-50%);
+        font-size: 1.25rem;
+        color: var(--color-base-content);
+        opacity: 0.5;
+        pointer-events: none;
+        transition: color 0.5s ease;
+    }
+
+    /* [ 메인 제출 버튼 ] */
+    .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        border: none;
+        outline: none;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+
+    .btn-submit {
+        margin-top: 0.75rem;
+        height: 3rem;
+        width: 100%;
+        border-radius: 0.5rem;
+        background-color: var(--color-primary);
+        color: var(--color-primary-content);
+        font-size: 1rem;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        transition:
+            background-color 0.5s ease,
+            color 0.5s ease;
+    }
+
+    .btn-submit:hover {
+        background-color: var(--custom-hover);
+    }
+
+    /* [ SNS 버튼 영역 ] */
+    .sns-container {
+        margin-top: 1.25rem;
+        width: 100%;
+    }
+
+    .sns-title {
+        margin-bottom: 0.75rem;
+        font-size: 0.75rem;
+        color: var(--color-base-content);
+        opacity: 0.7;
+        transition: color 0.5s ease;
+    }
+
+    .sns-buttons {
+        display: flex;
+        gap: 0.75rem;
+        width: 100%;
+    }
+
+    .sns-btn {
+        display: flex;
+        height: 2.75rem;
+        flex: 1;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        border-radius: 0.5rem;
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-decoration: none;
+        box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    }
+
+    .sns-icon {
+        height: 1rem;
+        width: 1rem;
+    }
+
+    .google-tab {
+        border: 1px solid var(--color-base-200);
+        background-color: #ffffff;
+        color: var(--color-base-content);
+        transition: all 0.5s ease;
+    }
+
+    .google-tab:hover {
+        background-color: var(--color-base-100);
+    }
+
+    .kakao-tab {
+        background-color: #fee500;
+        color: #191919;
+    }
+
+    /* [ 슬라이딩 토글 오버레이 패널 ] */
+    .toggle-box {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+    }
+
+    .toggle-box::before {
+        content: "";
+        position: absolute;
+        left: -250%;
+        width: 300%;
+        height: 100%;
+        background-color: var(--color-primary);
+        border-radius: 150px;
+        z-index: 2;
+        transition:
+            left 0.7s ease-in-out,
+            background-color 0.5s ease-in-out;
+    }
+
+    .toggle-panel {
+        position: absolute;
+        top: 0;
+        z-index: 2;
+        display: flex;
+        height: 100%;
+        width: 50%;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        color: var(--color-primary-content);
+        transition: all 0.6s ease-in-out;
+    }
+
+    .toggle-panel h1 {
+        margin-bottom: 0.5rem;
+        font-size: 1.875rem;
+        font-weight: 800;
+    }
+
+    .toggle-panel p {
+        margin-bottom: 1.5rem;
+        font-size: 0.875rem;
+        opacity: 0.9;
+    }
+
+    .toggle-panel.toggle-left {
+        left: 0;
+        transition-delay: 0.2s;
+    }
+
+    .toggle-panel.toggle-right {
+        right: -50%;
+    }
+
+    .btn-toggle {
+        height: 2.75rem;
+        width: 10rem;
+        border-radius: 0.5rem;
+        border: 2px solid var(--color-primary-content);
+        background-color: transparent;
+        color: var(--color-primary-content);
+    }
+
+    .btn-toggle:hover {
+        background-color: var(--color-primary-content);
+        color: var(--color-primary);
+    }
+
+    /* ====================================================
+        Active 상태 (회원가입 슬라이딩 전환 애니메이션)
+    ==================================================== */
+    .auth-card.active .toggle-box::before {
+        left: 50%;
+    }
+
+    .auth-card.active .form-box {
+        right: 50%;
+    }
+
+    .auth-card.active .form-box.sign-in-form {
+        visibility: hidden;
+        opacity: 0;
+    }
+
+    .auth-card.active .form-box.signup {
+        visibility: visible;
+        opacity: 1;
+    }
+
+    .auth-card.active .toggle-panel.toggle-left {
+        left: -50%;
+        transition-delay: 0.1s;
+    }
+
+    .auth-card.active .toggle-panel.toggle-right {
+        right: 0;
+        transition-delay: 0.3s;
+    }
+</style>
+
+<script>
+    import { SITE_CONFIG } from "@/lib/site";
+
+    declare global {
+        interface Window {
+            setGlobalTheme?: (theme: string) => void;
+        }
+    }
+
+    // 1. 공통 알림 및 유틸리티
+    function showAlert(
+        message: string,
+        type: "success" | "error" | "warning" | "info"
+    ) {
+        const targetAlert = document.querySelector(
+            `.custom-alert.alert-trigger-${type}`
+        ) as HTMLDivElement | null;
+        if (!targetAlert) return;
+
+        const textContainer = targetAlert.querySelector(".alert-message");
+        if (textContainer) textContainer.textContent = message;
+
+        const soundPath = targetAlert.dataset.sound;
+        if (soundPath) {
+            const audio = new Audio(soundPath);
+            audio.currentTime = 0;
+            audio
+                .play()
+                .catch((err) => console.log("사운드 재생 차단됨:", err));
+        }
+
+        targetAlert.classList.add("show");
+        setTimeout(() => targetAlert.classList.remove("show"), 3000);
+    }
+
+    const isValidEmail = (email: string) =>
+        /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(email);
+
+    const checkPasswordSecurity = (password: string) => {
+        return (
+            password.length >= 6 &&
+            password.length <= 20 &&
+            /[!@#$%^&*(),.?":{}|<>]/g.test(password)
+        );
+    };
+
+    // 2. SITE_CONFIG 연동 테마 제어
+    // 기본 테마(LOGIN_THEME)는 SITE_CONFIG의 defaultTheme("dog") 사용
+    const LOGIN_THEME = SITE_CONFIG.theme.defaultTheme; // "dog"
+    const SIGNUP_THEME = "cat";
+
+    const authCard = document.getElementById(
+        "authCard"
+    ) as HTMLDivElement | null;
+    const signinBtn = document.querySelector(
+        ".signin-btn"
+    ) as HTMLButtonElement | null;
+    const signupBtn = document.querySelector(
+        ".signup-btn"
+    ) as HTMLButtonElement | null;
+
+    // 테마 동기화 함수 (Layout의 SITE_CONFIG 기반 setGlobalTheme 실행)
+    const applyTheme = (themeName: string) => {
+        if (authCard) {
+            authCard.setAttribute("data-theme", themeName);
+        }
+        if (typeof window.setGlobalTheme === "function") {
+            window.setGlobalTheme(themeName);
+        } else {
+            document.documentElement.setAttribute("data-theme", themeName);
+        }
+    };
+
+    // 회원가입 화면 활성화 (cat 테마)
+    const activateSignUp = () => {
+        if (!authCard) return;
+        authCard.classList.add("active");
+        applyTheme(SIGNUP_THEME);
+    };
+
+    // 로그인 화면 활성화 (SITE_CONFIG.theme.defaultTheme 적용)
+    const deactivateSignUp = () => {
+        if (!authCard) return;
+        authCard.classList.remove("active");
+        applyTheme(LOGIN_THEME);
+    };
+
+    signupBtn?.addEventListener("click", activateSignUp);
+    signinBtn?.addEventListener("click", deactivateSignUp);
+
+    // 초기 로딩 시 테마 적용
+    if (authCard) {
+        const isSignUpActive = authCard.classList.contains("active");
+        applyTheme(isSignUpActive ? SIGNUP_THEME : LOGIN_THEME);
+    }
+
+    // 3. 로그인 처리 (Form Submit)
+    const signinForm = document.getElementById(
+        "signinForm"
+    ) as HTMLFormElement | null;
+    signinForm?.addEventListener("submit", async function (e) {
+        e.preventDefault();
+
+        const emailField = signinForm.querySelector(
+            'input[name="email"]'
+        ) as HTMLInputElement;
+        const passwordField = signinForm.querySelector(
+            'input[name="password"]'
+        ) as HTMLInputElement;
+
+        if (!isValidEmail(emailField.value)) {
+            showAlert("유효한 이메일 주소를 입력해주세요.", "warning");
+            emailField.select();
+            return;
+        }
+
+        if (!checkPasswordSecurity(passwordField.value)) {
+            showAlert(
+                "비밀번호는 6자 이상 20자 이하이며, 특수문자를 포함해야 합니다.",
+                "warning"
+            );
+            passwordField.select();
+            return;
+        }
+
+        try {
+            const response = await fetch("http://localhost:8787/auth/login", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    email: emailField.value,
+                    password: passwordField.value
+                })
+            });
+
+            interface AuthResponse {
+                token?: string;
+                refreshToken?: string;
+                user?: { email?: string };
+                error?: string;
+            }
+
+            const result = (await response.json()) as AuthResponse;
+
+            if (response.ok && result.token) {
+                document.cookie = `sb-access-token=${result.token}; path=/; max-age=${60 * 60 * 24 * 7}; SameSite=Lax`;
+                if (result.refreshToken) {
+                    document.cookie = `sb-refresh-token=${result.refreshToken}; path=/; max-age=${60 * 60 * 24 * 30}; SameSite=Lax`;
+                }
+
+                showAlert(
+                    `${result.user?.email || emailField.value}님, 환영합니다!`,
+                    "success"
+                );
+                setTimeout(() => {
+                    window.location.href = "/";
+                }, 1500);
+            } else {
+                showAlert(result.error || "로그인 실패", "error");
+            }
+        } catch (err: any) {
+            showAlert(
+                err.message || "로그인 처리 중 오류가 발생했습니다.",
+                "error"
+            );
+        }
+    });
+
+    // 4. 회원가입 처리 (Form Submit)
+    const signupForm = document.getElementById(
+        "signupForm"
+    ) as HTMLFormElement | null;
+    signupForm?.addEventListener("submit", async function (e) {
+        e.preventDefault();
+
+        const emailField = signupForm.querySelector(
+            'input[name="email"]'
+        ) as HTMLInputElement;
+        const nameField = signupForm.querySelector(
+            'input[name="name"]'
+        ) as HTMLInputElement;
+        const passwordField = signupForm.querySelector(
+            'input[name="password"]'
+        ) as HTMLInputElement;
+        const rePasswordField = signupForm.querySelector(
+            'input[name="repassword"]'
+        ) as HTMLInputElement;
+
+        if (!isValidEmail(emailField.value)) {
+            showAlert("유효한 이메일을 입력해주세요.", "warning");
+            emailField.select();
+            return;
+        }
+
+        if (!checkPasswordSecurity(passwordField.value)) {
+            showAlert(
+                "비밀번호는 6자 이상 20자 이하이며, 특수문자를 포함해야 합니다.",
+                "warning"
+            );
+            passwordField.select();
+            return;
+        }
+
+        if (passwordField.value !== rePasswordField.value) {
+            showAlert("비밀번호가 서로 일치하지 않습니다.", "warning");
+            rePasswordField.select();
+            return;
+        }
+
+        try {
+            const response = await fetch(
+                "http://localhost:8787/api/auth/signup",
+                {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        email: emailField.value,
+                        password: passwordField.value,
+                        username: nameField.value
+                    })
+                }
+            );
+
+            interface SignUpResponse {
+                message?: string;
+                error?: string;
+            }
+
+            const result = (await response.json()) as SignUpResponse;
+
+            if (!response.ok) {
+                throw new Error(
+                    result.error || "회원가입 처리에 실패했습니다."
+                );
+            }
+
+            showAlert("회원가입이 완료되었습니다!", "success");
+            setTimeout(() => {
+                deactivateSignUp();
+            }, 2000);
+        } catch (err: any) {
+            showAlert(
+                err.message || "회원가입 중 오류가 발생했습니다.",
+                "error"
+            );
+        }
+    });
+</script>

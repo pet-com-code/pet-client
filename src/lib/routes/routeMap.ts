@@ -30,7 +30,6 @@ export interface RouteConfig {
     view: any;
     title: string;
     description: string;
-    isLogin?: boolean;
 }
 
 // 1. 한글 경로 <-> 영문 경로 Alias 매핑, 영문-한글 변환표
@@ -79,13 +78,11 @@ export const ROUTE_MAP: Record<string, any> = {
         로그인: {
             view: Sign,
             title: "로그인",
-            isLogin: true,
             description: "로그인 페이지입니다."
         },
         회원가입: {
             view: Sign,
             title: "회원가입",
-            isLogin: false,
             description: "회원가입 페이지입니다."
         }
     },
