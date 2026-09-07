@@ -1,102 +1,245 @@
 ---
 import { Image } from "astro:assets";
 import ImgLogo from "@/assets/img/petIcon.png";
-import ThemeToggle from "@/com/theme/ThemeToggleCSS.astro";
 
+import ThemeToggle from "@/com/theme/ThemeToggleCSS.astro";
+import SearchInput from "@/com/search/MainSearch.astro";
+
+// 1. 부모(페이지)로부터 넘겨받을 변수들의 타입을 정의합니다.
 interface Props {
-    user?: any; // 진입점으로부터 넘겨받을 유저 데이터 타입 정의
+    user?: any;
+    searchWidth?: string;
+    searchHeight?: string;
 }
 
-const { user = null } = Astro.props;
+// 2. 전달된 데이터가 없을 경우를 대비한 기본값(Fallback)을 설정합니다.
+const { user, searchWidth = "800px", searchHeight = "46px" } = Astro.props;
 
 const isLoggedIn = user !== null;
 console.log("[ HOME ]에서 확인한 로그인 상태:", isLoggedIn, "유저 정보:", user);
 ---
 
-<main>
-    <header class="header-container">
-        <!-- 로고 영역 -->
+<header class="main-header">
+    <!-- 1. 로고 영역 -->
+    <div class="navbar-start">
         <h1 class="logo-box">
-            <!-- div 대신 h1를 쓰는 이유 : SEO(검색엔진 최적화) -->
             <a href="/">
                 <Image src={ImgLogo} width={150} alt="펫 아이콘" />
             </a>
         </h1>
+    </div>
 
-        <!-- 3. 🌟 우측 수직 정렬 유틸리티 묶음 박스 -->
-        <div class="right-utility-box">
-            <!-- [1층] 테마 토글 컴포넌트가 위로 안착 -->
-            <ThemeToggle />
-
-            <!-- [2층] 로그인 상태 분기 구역이 아래로 배치 -->
-            <div class="action-zone">
-                {
-                    user ? (
-                        <div class="sign-box">
-                            <a href="/마이보드" class="auth-link login-tab">
-                                마이보드
-                            </a>
-                            <a href="/로그아웃" class="auth-link signup-tab">
-                                로그아웃
-                            </a>
-                        </div>
-                    ) : (
-                        <div class="sign-box">
-                            <a href="/로그인" class="auth-link login-tab">
-                                로그인
-                            </a>
-                            <a href="/회원가입" class="auth-link signup-tab">
-                                회원가입
-                            </a>
-                        </div>
-                    )
-                }
-            </div>
+    <!-- 2. 중앙 Search & Sub-Nav 영역 -->
+    <div class="search-box-container">
+        <!-- 검색바 컴포넌트 래퍼 -->
+        <div class="search-component-wrapper">
+            <SearchInput
+                searchWidth={searchWidth}
+                searchHeight={searchHeight}
+            />
         </div>
-    </header>
-</main>
+
+        <!-- 검색창 하단 네비게이션 -->
+        <nav class="sub-nav">
+            <ul class="sub-nav-menu">
+                <li><a href="/dog">쇼츠</a></li>
+                <li><a href="/cat">파인더</a></li>
+                <li><a href="/shop">쇼핑</a></li>
+                <li><a href="/blog">블로그</a></li>
+            </ul>
+        </nav>
+    </div>
+
+    <!-- 3. 우측 수직 정렬 유틸리티 묶음 박스 -->
+    <div class="navbar-end">
+        <!-- [1층] 테마 토글 컴포넌트 -->
+        <div class="theme-toggle-wrapper">
+            <ThemeToggle />
+        </div>
+
+        <!-- [2층] 로그인/회원가입 액션 영역 -->
+        <div class="action-zone">
+            {
+                user ? (
+                    <div class="join-group">
+                        <a href="/마이보드" class="join-item">
+                            마이보드
+                        </a>
+                        <a href="/로그아웃" class="join-item">
+                            로그아웃
+                        </a>
+                    </div>
+                ) : (
+                    <div class="join-group">
+                        <a href="/로그인" class="join-item">
+                            로그인
+                        </a>
+                        <a href="/회원가입" class="join-item">
+                            회원가입
+                        </a>
+                    </div>
+                )
+            }
+        </div>
+    </div>
+</header>
 
 <style>
-    .action-zone {
+    /* ==========================================================================
+   메인 헤더 컴포넌트 스타일 (theme.css 변수 완벽 연동)
+   ========================================================================== */
+
+    /* 1. 전체 헤더 레이아웃 */
+    .main-header {
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        min-height: 120px; /* min-h-30 대응 */
         width: 100%;
+        padding-left: 1.25rem; /* px-5 */
+        padding-right: 1.25rem;
+        box-sizing: border-box;
+    }
+
+    /* 2. 좌측 로고 영역 */
+    .navbar-start {
+        width: auto;
+    }
+
+    .logo-box {
+        margin: 0;
+        padding: 0;
+        display: flex;
+        align-items: center;
+        height: 90px; /* h-[90px] */
+    }
+
+    .logo-box a {
         display: block;
+        height: 100%;
+    }
 
-        /* 💡 [핵심] Astro의 Scoped CSS 조건부 렌더링 버그를 완전히 깨부수는 글로벌 셀렉터 결합 */
-        /* 코드 분기 시 Astro의 스타일 세어나감을 막기 위해 :global 처리 */
-        :global(.sign-box) {
-            display: flex !important;
-            width: 180px !important;
-            height: 38px !important;
-            background-color: #ffffff !important;
-            border: 1px solid var(--theme-main, #333333) !important; /* 테마 메인선 자동 추적 */
-            border-radius: 20px !important;
-            overflow: hidden !important;
-            box-sizing: border-box !important;
-        }
+    .logo-box img {
+        height: 100%;
+        width: auto;
+        object-fit: contain; /* object-contain */
+    }
 
-        /* 로그인 / 회원가입 내부 글자 링크 버튼 스타일 강제 주입 */
-        :global(.auth-link) {
-            flex: 1 !important;
-            display: flex !important;
-            align-items: center !important;
-            justify-content: center !important;
-            font-size: 13px !important;
-            font-weight: 700 !important;
-            color: var(--text-main, #333333) !important;
-            background-color: #ffffff !important;
-            transition: all 0.2s ease !important;
+    /* 3. 중앙 검색 및 서브 메뉴 영역 */
+    .search-box-container {
+        margin-left: auto;
+        margin-right: auto; /* mx-auto */
+        display: flex;
+        flex-direction: column; /* flex-col */
+        align-items: center;
+        width: 100%;
+        max-width: 650px; /* max-w-[650px] */
+        gap: 0.75rem; /* gap-3 */
+    }
 
-            /* 마우스 호버 시 포인트 컬러 및 은은한 배경 피드백 */
-            &:hover {
-                background-color: var(--theme-bg-light, #f3f4f6) !important;
-                color: var(--theme-hover, #111827) !important;
-            }
-        }
-        /* 가운데를 갈라주는 얇은 세로 구분선 */
-        /* 반반 쪼개주는 가운데 얇은 세로선 */
+    .search-component-wrapper {
+        width: 100%;
+        max-width: 600px; /* max-w-[600px] */
+    }
 
-        :global(.login-tab) {
-            border-right: 1px solid var(--theme-main, #333333) !important;
-        }
+    .sub-nav {
+        width: 100%;
+        max-width: 600px; /* max-w-[600px] */
+    }
+
+    .sub-nav-menu {
+        display: flex;
+        justify-content: center;
+        gap: 1.5rem; /* gap-6 */
+        padding: 0;
+        margin: 0;
+        list-style: none;
+        width: 100%;
+        font-size: 1rem; /* text-base */
+        font-weight: bold;
+    }
+
+    .sub-nav-menu a {
+        text-decoration: none;
+        color: var(--color-base-content); /* 테마별 메인 글자색 */
+        transition: color 0.15s ease-in-out; /* transition-colors */
+    }
+
+    .sub-nav-menu a:hover {
+        color: var(
+            --color-primary
+        ); /* hover:text-primary -> 테마별 주색상으로 전환 */
+    }
+
+    /* 4. 우측 유틸리티 영역 */
+    .navbar-end {
+        display: flex;
+        flex-direction: column; /* flex-col */
+        align-items: flex-end; /* items-end */
+        width: auto;
+        gap: 0.5rem; /* gap-2 */
+    }
+
+    .theme-toggle-wrapper {
+        display: flex;
+        width: 100%;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .action-zone {
+        display: flex;
+        align-items: center;
+    }
+
+    /* 5. 로그인/회원가입 버튼 묶음 박스 (daisyUI join 완벽 대체) */
+    .join-group {
+        display: flex;
+        height: 38px; /* h-[38px] */
+        width: 180px; /* w-[180px] */
+        overflow: hidden; /* overflow-hidden */
+        border-radius: 9999px; /* rounded-full */
+        box-shadow: var(--custom-shadow); /* 테마별 그림자 적용 */
+        background-color: var(--color-base-100); /* 배경색과 결을 맞춤 */
+        border: 1px solid var(--border-color, var(--color-base-200)); /* 테마별 테두리 색상 선언 (없으면 base-200 대체) */
+        transition:
+            border-color 0.3s,
+            box-shadow 0.3s;
+    }
+
+    .join-item {
+        flex: 1; /* flex-1 */
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 100%;
+        font-size: 0.75rem; /* text-xs */
+        font-weight: bold;
+        text-decoration: none;
+        color: var(--color-base-content); /* 글자색 통일 */
+        background: transparent;
+        border: none;
+        cursor: pointer;
+        transition:
+            background-color 0.2s ease,
+            color 0.2s ease;
+    }
+
+    /* 두 버튼 사이의 구별용 세로선 선언 */
+    .join-group .join-item:not(:last-child) {
+        border-right: 1px solid var(--border-color, var(--color-base-200));
+    }
+
+    /* 호버 시 테마별 포인트 컬러 채우기 */
+    .join-item:hover {
+        background-color: var(--color-primary); /* hover:bg-theme-main 대용 */
+        color: var(
+            --color-primary-content
+        ); /* 채워진 배경에 맞춰 폰트색 자동 변경 */
+    }
+
+    .join-item:focus {
+        outline: none; /* focus:outline-none */
     }
 </style>
