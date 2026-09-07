@@ -2,6 +2,9 @@
 import GuideBubble from "@/com/alert/CloudBubbleCSS.astro";
 import DesktopScreen from "@/com/screen/DesktopScreen.astro";
 
+import Header from "@/com/line/Header.astro";
+import Footer from "@/com/line/Footer.astro";
+
 const title = "Astro";
 const description = "Astro My....";
 ---
@@ -25,18 +28,54 @@ const description = "Astro My....";
 
 <!-- 2. 실제 메인 콘텐츠 영역 (자동으로 1200px 중앙 정렬 적용됨) -->
 <div id="main-content" class="hidden">
-    <header>
-        <h1>펫줍.닷컴 메인 페이지 콘텐츠</h1>
-    </header>
+    <Header />
     <main>
         <p>여기는 효과가 끝난 뒤 나타나는 1200px 너비의 메인 화면입니다.</p>
     </main>
+    <Footer />
 </div>
+
+<style>
+    /* ==========================================================================
+        로딩 스크린 레이아웃 및 레이어 순서 정리
+    ========================================================================== */
+    #loading-screen2 {
+        position: fixed; /* 브라우저 창 기준으로 화면 고정 */
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        background-color: var(--background-color, #ffffff);
+        z-index: 100000; /* 메인 페이지보다 위에 표시 */
+    }
+
+    #loading-screen {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%; /* 100vw 대신 100%로 변경 (스크롤바 너비 제외) */
+        height: 100%; /* 100vh 대신 100%로 변경 (fixed 구조에서 더 안정적) */
+        background-color: var(--background-color, #ffffff);
+        z-index: 100000;
+
+        overflow: hidden; /* 내부 콘텐츠가 넘치더라도 스크롤 바를 강제로 숨김 */
+    }
+
+    /* 메인 콘텐츠 초기 상태 숨김 */
+    #main-content {
+        transition: opacity 0.5s ease;
+    }
+
+    .hidden {
+        opacity: 0;
+        position: absolute;
+        width: 100%;
+        pointer-events: none;
+    }
+</style>
 
 <script is:inline>
     function initializeApp() {
-        console.log("=== 🐶 펫줍 서비스 초기화 시작 (PC 데스크톱 전용) ===");
-
         // 오디오 파일 설정
         const shutterSound = new Audio("/sound/shutter.mp3");
         shutterSound.preload = "auto";
@@ -126,30 +165,3 @@ const description = "Astro My....";
     initializeApp();
     document.addEventListener("astro:page-load", initializeApp);
 </script>
-
-<style>
-    /* ==========================================================================
-     로딩 스크린 레이아웃 및 레이어 순서 정리
-     ========================================================================== */
-    #loading-screen {
-        position: fixed; /* 브라우저 창 기준으로 화면 고정 */
-        top: 0;
-        left: 0;
-        width: 100vw;
-        height: 100vh;
-        background-color: var(--background-color, #ffffff);
-        z-index: 100000; /* 메인 페이지보다 위에 표시 */
-    }
-
-    /* 메인 콘텐츠 초기 상태 숨김 */
-    #main-content {
-        transition: opacity 0.5s ease;
-    }
-
-    .hidden {
-        opacity: 0;
-        position: absolute;
-        width: 100%;
-        pointer-events: none;
-    }
-</style>

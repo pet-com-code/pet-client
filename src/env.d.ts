@@ -1,0 +1,12 @@
+// Astro 미들웨어에서 context.locals에 데이터를 저장하려면 먼저 타입 정의를 추가해야 합니다.
+// src/env.d.ts 파일에 아래 내용을 추가해 줍니다.
+
+/// <reference path="../.astro/types.d.ts" />
+
+declare namespace App {
+    interface Locals {
+        user: any | null; // 인증된 사용자 정보 객체
+        accessToken: string | null; // 액세스 토큰
+        siteType: "SHOP" | "FIND"; // 접속된 사이트 종류
+    }
+}

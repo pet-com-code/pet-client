@@ -2,12 +2,12 @@
 import { SITE_CONFIG } from "@/lib/site";
 ---
 
-<!-- 1. 구조 설계: 시맨틱 태그 및 순수 CSS 클래스로 교체 -->
+<!-- 1. 구조 설계: ID 대신 CLASS 및 Data Attribute 기반으로 변경하여 중복 로딩 문제 해결 -->
 <div class="theme-toggle-container" role="radiogroup" aria-label="테마 선택">
     <!-- 강아지 버튼 -->
     <button
-        id="toggle-dog"
-        class="toggle-btn"
+        type="button"
+        class="toggle-btn toggle-btn-dog"
         role="radio"
         aria-checked="true"
         aria-label="강아지 테마"
@@ -17,8 +17,8 @@ import { SITE_CONFIG } from "@/lib/site";
 
     <!-- 고양이 버튼 -->
     <button
-        id="toggle-cat"
-        class="toggle-btn"
+        type="button"
+        class="toggle-btn toggle-btn-cat"
         role="radio"
         aria-checked="false"
         aria-label="고양이 테마"
@@ -27,8 +27,9 @@ import { SITE_CONFIG } from "@/lib/site";
     </button>
 </div>
 
-<!-- Astro 서버 변수를 Client Script로 안전하게 전달 -->
+<!-- 💡 ⭐ is:inline 속성을 반드시 추가해야 define:vars 값이 정상 전달되고 전역 스크립트로 동작합니다. -->
 <script
+    is:inline
     define:vars={{
         COOKIE_KEY: SITE_CONFIG.theme.cookieKey,
         STORAGE_KEY: SITE_CONFIG.theme.storageKey,
@@ -36,13 +37,11 @@ import { SITE_CONFIG } from "@/lib/site";
     }}
 >
     function setupThemeToggle() {
-        const dogBtn = document.getElementById("toggle-dog");
-        const catBtn = document.getElementById("toggle-cat");
+        // querySelectorAll을 사용하여 페이지 내 모든 테마 토글 버튼을 함께 제어 (헤더 + 본문 중복 대응)
+        const dogBtns = document.querySelectorAll(".toggle-btn-dog");
+        const catBtns = document.querySelectorAll(".toggle-btn-cat");
 
-        if (!dogBtn || !catBtn) return;
-
-        // 초기 설정값 가져오기 (기본값 general)
-        const currentTheme = localStorage.getItem("pet-theme") || "general";
+        if (dogBtns.length === 0 && catBtns.length === 0) return;
 
         // 1. 현재 적용된 테마 감지 (쿠키 -> 로컬스토리지 -> DOM 속성 -> 기본값)
         const getActiveTheme = () => {
@@ -57,21 +56,23 @@ import { SITE_CONFIG } from "@/lib/site";
             );
         };
 
-        // 💡 테마 활성화 스타일을 순수 CSS 클래스(.active) 단 하나로 제어
-        // 버튼 활성화 상태 UI updates (.active 클래스 및 ARIA)
+        // 2. 버튼 활성화 상태 UI updates (.active 클래스 및 ARIA)
         const updateToggleStyle = (theme) => {
-            const toggleClasses = (activeBtn, inactiveBtn) => {
-                activeBtn.classList.add("active");
-                activeBtn.setAttribute("aria-checked", "true");
-
-                inactiveBtn.classList.remove("active");
-                inactiveBtn.setAttribute("aria-checked", "false");
+            const toggleClasses = (activeBtns, inactiveBtns) => {
+                activeBtns.forEach((btn) => {
+                    btn.classList.add("active");
+                    btn.setAttribute("aria-checked", "true");
+                });
+                inactiveBtns.forEach((btn) => {
+                    btn.classList.remove("active");
+                    btn.setAttribute("aria-checked", "false");
+                });
             };
 
             if (theme === "cat") {
-                toggleClasses(catBtn, dogBtn);
+                toggleClasses(catBtns, dogBtns);
             } else {
-                toggleClasses(dogBtn, catBtn);
+                toggleClasses(dogBtns, catBtns);
             }
         };
 
@@ -86,34 +87,32 @@ import { SITE_CONFIG } from "@/lib/site";
             updateToggleStyle(targetTheme);
         };
 
-        // 4. 이벤트 바인딩 (중복 방지 및 전파 제어)
-        dogBtn.onclick = (e) => {
-            e.stopPropagation();
-            applyTheme("dog");
-        };
+        // 4. 이벤트 바인딩 (모든 버튼에 적용)
+        dogBtns.forEach((btn) => {
+            btn.onclick = (e) => {
+                e.stopPropagation();
+                applyTheme("dog");
+            };
+        });
 
-        catBtn.onclick = (e) => {
-            e.stopPropagation();
-            applyTheme("cat");
-        };
+        catBtns.forEach((btn) => {
+            btn.onclick = (e) => {
+                e.stopPropagation();
+                applyTheme("cat");
+            };
+        });
 
         // 초기 실행
         updateToggleStyle(getActiveTheme());
     }
 
-    // Astro 생명주기 대응 스크립트 실행 등록, Astro 페이지 라이프사이클 대응
+    // Astro 생명주기 대응 스크립트 실행 등록
     document.addEventListener("DOMContentLoaded", setupThemeToggle);
     document.addEventListener("astro:after-swap", setupThemeToggle);
     document.addEventListener("astro:page-load", setupThemeToggle);
 </script>
 
-<!-- Astro 컴포넌트 스코프 CSS (자동으로 이 컴포넌트에만 적용됩니다) -->
 <style>
-    /* 글로벌 변수 대응용 테마 배경색 (필요 시 원하는 색상값으로 고정 가능) */
-    /* :root {
-        --theme-bg: #f3f4f6; 기존 bg-theme-bg 대용 기본값
-    } */
-
     /* 컨테이너 글래스모피즘 구현 */
     .theme-toggle-container {
         position: relative;
