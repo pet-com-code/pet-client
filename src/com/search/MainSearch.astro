@@ -209,8 +209,10 @@ const jsonData = JSON.stringify({ petJson, eventJson });
         const bridgeElement = document.getElementById("search-data-bridge");
         if (bridgeElement) {
             const bridgeData = JSON.parse(bridgeElement.textContent || "{}");
-            petsData = bridgeData.pets || [];
-            eventsData = bridgeData.events || [];
+            petsData = bridgeData.petJson || [];
+            eventsData = bridgeData.eventJson || [];
+        } else {
+            console.error("❌ search-data-bridge 엘리먼트를 찾을 수 없습니다.");
         }
     } catch (e) {
         console.error("❌ 데이터 브릿지 JSON 파싱 에러:", e);
