@@ -7,6 +7,5 @@ declare namespace App {
     interface Locals {
         user: any | null; // 인증된 사용자 정보 객체
         accessToken: string | null; // 액세스 토큰
-        siteType: "SHOP" | "FIND"; // 접속된 사이트 종류
     }
 }

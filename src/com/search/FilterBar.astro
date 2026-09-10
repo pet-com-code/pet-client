@@ -1,0 +1,461 @@
+---
+// 1. 타입 인터페이스 정의
+interface OptionItem {
+    code: string;
+    name: string;
+}
+
+interface FilterGroup {
+    id: string; // Form field name (예: ageStage, texture 등)
+    label: string; // 선택창 기본 라벨
+    options: OptionItem[];
+}
+
+interface CategoryFilterSchema {
+    [categoryCode: string]: FilterGroup[];
+}
+
+// 2. 기본 고정 옵션
+const PET_OPTIONS: OptionItem[] = [
+    { code: "D", name: "🐶 강아지 (Dog)" },
+    { code: "C", name: "🐱 고양이 (Cat)" }
+];
+
+const CATEGORY_OPTIONS: OptionItem[] = [
+    { code: "FO", name: "🍲 사료 (Food)" },
+    { code: "SN", name: "🍖 간식 (Snack)" },
+    { code: "TY", name: "🧸 장난감 (Toy)" },
+    { code: "CL", name: "👕 의류 (Clothes)" },
+    { code: "SP", name: "🎒 용품 (Supplies)" }
+];
+
+// 3. 카테고리별 세분화 필터 스키마 정의
+const CATEGORY_FILTER_SCHEMA: CategoryFilterSchema = {
+    // 🍲 사료 세부 필터 (4개 드롭다운)
+    FO: [
+        {
+            id: "ageStage",
+            label: "성장 단계",
+            options: [
+                { code: "PUPPY", name: "퍼피/키튼 (영유아)" },
+                { code: "ADULT", name: "어덜트 (성견/성묘)" },
+                { code: "SENIOR", name: "시니어 (7세 이상)" },
+                { code: "ALL", name: "전연령" }
+            ]
+        },
+        {
+            id: "texture",
+            label: "제형",
+            options: [
+                { code: "DRY", name: "건식 사료" },
+                { code: "WET", name: "습식/캔/파우치" },
+                { code: "FD", name: "동결건조/화식" }
+            ]
+        },
+        {
+            id: "careType",
+            label: "케어 기능",
+            options: [
+                { code: "SKIN", name: "피부/모질/알러지" },
+                { code: "JOINT", name: "관절/뼈" },
+                { code: "WEIGHT", name: "체중조절/다이어트" },
+                { code: "DIGEST", name: "소화/장" }
+            ]
+        },
+        {
+            id: "mainIngredient",
+            label: "주원료",
+            options: [
+                { code: "CHICKEN", name: "닭고기" },
+                { code: "SALMON", name: "연어/해산물" },
+                { code: "BEEF", name: "소고기" },
+                { code: "DUCK", name: "오리고기" },
+                { code: "LAMB", name: "양고기" }
+            ]
+        }
+    ],
+    // 🍖 간식 세부 필터
+    SN: [
+        {
+            id: "snackType",
+            label: "간식 제형",
+            options: [
+                { code: "CHURU", name: "츄르/짜먹는 간식" },
+                { code: "DENTAL", name: "덴탈껌/치량" },
+                { code: "JERKY", name: "육포/져키" },
+                { code: "FREEZE", name: "동결건조/트릿" },
+                { code: "RAW", name: "수제간식/뼈간식" }
+            ]
+        },
+        {
+            id: "mainIngredient",
+            label: "주원료",
+            options: [
+                { code: "CHICKEN", name: "닭고기" },
+                { code: "SALMON", name: "연어/해산물" },
+                { code: "BEEF", name: "소고기" },
+                { code: "VEGE", name: "채소/과일" }
+            ]
+        }
+    ],
+    // 🧸 장난감 세부 필터
+    TY: [
+        {
+            id: "playType",
+            label: "놀이 유형",
+            options: [
+                { code: "NOSE", name: "노즈워크/지능" },
+                { code: "PLUSH", name: "봉제인형/삑삑이" },
+                { code: "ROPE", name: "밧줄/터그놀이" },
+                { code: "BALL", name: "공/원반" },
+                { code: "CATNIP", name: "캣잎/마따따비/낚싯대" }
+            ]
+        },
+        {
+            id: "toyMaterial",
+            label: "소재",
+            options: [
+                { code: "RUBBER", name: "고무/라텍스" },
+                { code: "COTTON", name: "천/면" },
+                { code: "PLASTIC", name: "플라스틱" },
+                { code: "WOOD", name: "우드/천연" }
+            ]
+        }
+    ],
+    // 👕 의류 세부 필터
+    CL: [
+        {
+            id: "clothesType",
+            label: "의류 종류",
+            options: [
+                { code: "TEE", name: "티셔츠/민소매" },
+                { code: "OUTER", name: "패딩/아우터" },
+                { code: "RAIN", name: "우비/방수복" },
+                { code: "ALL", name: "올인원/실내복" },
+                { code: "ACC", name: "악세서리/케이프" }
+            ]
+        },
+        {
+            id: "season",
+            label: "계절/소재",
+            options: [
+                { code: "SUMMER", name: "여름/쿨링/메시" },
+                { code: "WINTER", name: "겨울/기모/후리스" },
+                { code: "SPRING", name: "봄/가을(면)" }
+            ]
+        }
+    ],
+    // 🎒 용품 세부 필터
+    SP: [
+        {
+            id: "supplyCategory",
+            label: "용품 분류",
+            options: [
+                { code: "PAD", name: "배변패드/기저귀" },
+                { code: "SAND", name: "고양이 모래/화장실" },
+                { code: "LEASH", name: "하네스/리드줄/목줄" },
+                { code: "BOWL", name: "식기/급수기/자동급식" },
+                { code: "CARRY", name: "이동장/카시트/유모차" },
+                { code: "BED", name: "방석/하우스/스크래쳐" },
+                { code: "GROOM", name: "목욕/미용/위생" }
+            ]
+        }
+    ]
+};
+---
+
+<div class="filter-bar-card shadow-card">
+    <!-- 💡 안전한 스크립트 제어를 위해 onsubmit 제거 후 JS 내부에서 submit 이벤트를 차단 및 재조립합니다 -->
+    <form
+        id="filter-search-form"
+        action="/search"
+        method="GET"
+        class="filter-form"
+    >
+        <!-- 1단계: 메인 선택 바 (동물, 카테고리) -->
+        <div class="main-filter-bar">
+            <!-- 대상 동물 -->
+            <div class="form-control animal-control">
+                <select name="targetPet" class="select-field" required>
+                    <option value="" disabled selected>동물 선택</option>
+                    {
+                        PET_OPTIONS.map((opt: OptionItem) => (
+                            <option value={opt.code}>{opt.name}</option>
+                        ))
+                    }
+                </select>
+            </div>
+
+            <!-- 카테고리 -->
+            <div class="form-control category-control">
+                <select
+                    id="bar-select-category"
+                    name="category"
+                    class="select-field"
+                    required
+                >
+                    <option value="" disabled selected>카테고리 선택</option>
+                    {
+                        CATEGORY_OPTIONS.map((opt: OptionItem) => (
+                            <option value={opt.code}>{opt.name}</option>
+                        ))
+                    }
+                </select>
+            </div>
+
+            <!-- 검색 버튼 -->
+            <div class="search-btn-container">
+                <button type="submit" class="search-button btn-theme">
+                    <svg
+                        xmlns="http://w3.org"
+                        class="search-icon"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                    >
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                        ></path>
+                    </svg>
+                    검색
+                </button>
+            </div>
+        </div>
+
+        <!-- 2단계: 동적으로 생성되는 세부 필터 수신 컨테이너 -->
+        <div id="dynamic-subfilters-container" class="subfilters-container">
+            <div class="placeholder-text">
+                카테고리를 선택하시면 세부 필터가 표시됩니다.
+            </div>
+        </div>
+    </form>
+</div>
+
+<!-- ==========================================
+     자바스크립트 로직 (안전한 주소 조립 방식)
+========================================== -->
+<script is:inline define:vars={{ CATEGORY_FILTER_SCHEMA }}>
+    function initFilterBar() {
+        const form = document.getElementById("filter-search-form");
+        const catSelect = document.getElementById("bar-select-category");
+        const subContainer = document.getElementById(
+            "dynamic-subfilters-container"
+        );
+
+        if (!catSelect || !subContainer || !form) return;
+
+        // [💡 버그 해결 핵심] 원본 HTML의 name을 지우지 않고, 주소창만 안전하게 필터링하여 이동시킵니다.
+        form.onsubmit = function (event) {
+            event.preventDefault(); // 기본 전송을 완전히 막음
+
+            const formData = new FormData(form);
+            const params = new URLSearchParams();
+
+            // 폼 데이터를 돌면서 값이 존재하고 유효한 것만 추출하여 주소 생성
+            for (const [key, value] of formData.entries()) {
+                if (value && value.trim() !== "") {
+                    params.append(key, value);
+                }
+            }
+
+            // 완성된 깔끔한 주소로 직접 페이지 이동
+            const actionUrl = form.getAttribute("action") || "/search";
+            window.location.href = `${actionUrl}?${params.toString()}`;
+        };
+
+        // 카테고리 변경 이벤트
+        catSelect.onchange = function () {
+            const selectedCat = catSelect.value;
+            const schemaList = CATEGORY_FILTER_SCHEMA[selectedCat] || [];
+
+            // 컨테이너 초기화
+            subContainer.innerHTML = "";
+
+            if (schemaList.length === 0) {
+                subContainer.innerHTML =
+                    '<div class="placeholder-text">카테고리를 선택하시면 세부 필터가 표시됩니다.</div>';
+                return;
+            }
+
+            // 스키마 순회하며 세부 필터 렌더링
+            schemaList.forEach((group) => {
+                const wrapper = document.createElement("div");
+                wrapper.className = "dynamic-form-control";
+
+                let selectHtml = `<select name="${group.id}" class="select-field">`;
+                selectHtml += `<option value="">전체 (${group.label})</option>`;
+
+                group.options.forEach((opt) => {
+                    selectHtml += `<option value="${opt.code}">${opt.name}</option>`;
+                });
+
+                selectHtml += `</select>`;
+                wrapper.innerHTML = selectHtml;
+                subContainer.appendChild(wrapper);
+            });
+        };
+    }
+
+    // Astro 컴포넌트 생명주기 대응
+    document.addEventListener("DOMContentLoaded", initFilterBar);
+    document.addEventListener("astro:page-load", initFilterBar);
+</script>
+
+<!-- ==========================================
+     CSS 스타일 영역 (728x90 배너 크기 고정 & 나의 테마 파일 연동)
+========================================== -->
+<style is:global>
+    /* --- [728x90 강제 최적화] 카드 메인 컨테이너 --- */
+    .filter-bar-card {
+        width: 100%;
+        max-width: 728px;
+        height: 90px;
+        margin: 0 auto;
+        border-radius: 0.5rem;
+        padding: 4px 10px;
+        box-sizing: border-box;
+
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+
+        background-color: var(--color-base-100) !important;
+        border: 1px solid var(--color-base-200) !important;
+        transition:
+            background-color 0.3s ease,
+            border-color 0.3s ease,
+            box-shadow 0.2s ease;
+    }
+
+    /* --- 폼 및 내부 레이아웃 --- */
+    .filter-form {
+        width: 100%;
+    }
+
+    .filter-form > * + * {
+        margin-top: 4px;
+    }
+
+    .main-filter-bar {
+        display: flex;
+        width: 100%;
+        flex-direction: row;
+        align-items: center;
+        gap: 6px;
+    }
+
+    /* --- 입력 폼 컨트롤 너비 조절 --- */
+    .form-control {
+        box-sizing: border-box;
+    }
+    .animal-control,
+    .category-control {
+        width: 140px;
+    }
+
+    /* --- [높이 다이어트 + 테마 연동] 셀렉트 박스 공통 디자인 --- */
+    .filter-bar-card .select-field {
+        width: 100%;
+        height: 32px;
+        padding: 0 6px;
+        font-size: 13px;
+        box-sizing: border-box;
+        border-radius: 4px;
+
+        color: var(--color-base-content) !important;
+        background-color: var(--color-base-100) !important;
+        border: 1px solid var(--color-base-200) !important;
+        transition:
+            border-color 0.2s ease,
+            box-shadow 0.2s ease,
+            background-color 0.3s ease,
+            color 0.3s ease;
+    }
+
+    .filter-bar-card .select-field:focus {
+        outline: none !important;
+        border-color: var(--color-primary) !important;
+        box-shadow: 0 0 0 2px
+            color-mix(in srgb, var(--color-primary) 20%, transparent) !important;
+    }
+
+    /* 자바스크립트에 의해 추가되는 동적 감싸는 레이어 제어 */
+    .subfilters-container .dynamic-form-control {
+        width: 100%;
+        box-sizing: border-box;
+        display: block;
+    }
+
+    /* --- [높이 다이어트 + 테마 연동] 검색 버튼 --- */
+    .search-btn-container {
+        margin-left: auto;
+    }
+
+    .search-button {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 4px;
+        height: 32px;
+        padding: 0 16px;
+        font-size: 13px;
+        font-weight: 700;
+        white-space: nowrap;
+        border-radius: 4px;
+        border: none;
+        cursor: pointer;
+        box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.04);
+
+        background-color: var(--color-primary) !important;
+        color: var(--color-primary-content) !important;
+        transition:
+            background-color 0.2s ease,
+            color 0.2s ease;
+    }
+
+    .search-button:hover {
+        background-color: var(--custom-hover) !important;
+    }
+
+    .search-icon {
+        width: 12px;
+        height: 12px;
+    }
+
+    /* --- 2단계: 동적 세부 필터 레이아웃 압축 및 테마 연동 --- */
+    .subfilters-container {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 6px;
+        padding-top: 4px;
+        min-height: 32px;
+        position: relative;
+        border-top: 1px solid var(--border-base-200);
+        box-sizing: border-box;
+    }
+
+    /* 비어있을 때 안내 메시지 테마 연동 */
+    .subfilters-container .placeholder-text {
+        grid-column: 1 / -1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 11px;
+        text-align: center;
+        height: 32px;
+        border-radius: 4px;
+        box-sizing: border-box;
+
+        color: var(--color-base-content);
+        opacity: 0.6;
+        border: 1px dashed var(--border-base-200);
+        background-color: var(--color-base-200);
+    }
+
+    .subfilters-container:has(.dynamic-form-control) .placeholder-text {
+        display: none !important;
+    }
+</style>

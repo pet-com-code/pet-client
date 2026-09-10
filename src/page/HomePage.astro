@@ -4,9 +4,12 @@ import DesktopScreen from "@/com/screen/DesktopScreen.astro";
 
 import Header from "@/com/line/Header.astro";
 import Footer from "@/com/line/Footer.astro";
+import FilterBar from "@/com/search/FilterBar.astro";
 
 const title = "Astro";
 const description = "Astro My....";
+
+const { user } = Astro.locals;
 
 const isDebug = import.meta.env.PUBLIC_DEBUG_MODE === "true";
 ---
@@ -35,9 +38,12 @@ const isDebug = import.meta.env.PUBLIC_DEBUG_MODE === "true";
 <!-- 2. 실제 메인 콘텐츠 영역 (자동으로 1200px 중앙 정렬 적용됨) -->
 <!-- 2. 실제 메인 콘텐츠 영역: isDebug가 true이면 hidden 클래스를 적용하지 않아 바로 보여줍니다. -->
 <div id="main-content" class:list={[{ hidden: !isDebug }]}>
-    <Header user={"user"} searchWidth={"600px"} searchHeight={"46px"} />
+    <Header user={user} searchWidth={"600px"} searchHeight={"46px"} />
     <main>
         <p>여기는 효과가 끝난 뒤 나타나는 1200px 너비의 메인 화면입니다.</p>
+        <div style="width: 728px;">
+            <FilterBar />
+        </div>
     </main>
     <Footer />
 </div>

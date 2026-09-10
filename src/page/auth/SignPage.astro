@@ -1,18 +1,20 @@
 ---
+// AuthCard.astro
 import CustomAlert from "@/com/alert/CustomAlert.astro";
 
-// 💡 Props 및 isLogin / isSignUp 제어 변수를 모두 제거합니다.
 // 현재 요청된 URL 경로를 파악합니다. (/인증/회원가입 또는 /auth/signup 인지 확인)
 const pathname = decodeURIComponent(Astro.url.pathname).toLowerCase();
+console.log("pathname.... :: ", pathname);
 const isSignUpRoute =
     pathname.includes("회원가입") || pathname.includes("signup");
 
 // URL 경로에 따라 초기 테마 및 active 클래스 자동 설정
 const initialTheme = isSignUpRoute ? "cat" : "dog";
+const initialClass = isSignUpRoute ? "auth-card active" : "auth-card";
 ---
 
-<!-- isSignUpRoute 상태에 따라 초기 active 클래스와 data-theme 동적 지정 --><!-- active 클래스 및 data-theme 동적 지정 유지 --><!-- AuthCard.astro -->
-<div id="authCard" class="auth-card" data-theme="dog">
+<!-- 💡 [수정] 서버에서 계산된 initialClass와 initialTheme이 태그에 동적으로 직접 주입됩니다. -->
+<div id="authCard" class={initialClass} data-theme={initialTheme}>
     <!-- 커스텀 알림 영역 -->
     <div
         class="custom-alert alert-trigger-success"
@@ -71,7 +73,7 @@ const initialTheme = isSignUpRoute ? "cat" : "dog";
                     <a href="/auth/google" class="sns-btn google-tab">
                         <svg
                             class="sns-icon"
-                            xmlns="http://www.w3.org/2000/svg"
+                            xmlns="http://w3.org"
                             viewBox="0 0 48 48"
                         >
                             <path
@@ -96,7 +98,7 @@ const initialTheme = isSignUpRoute ? "cat" : "dog";
                     <a href="/auth/kakao" class="sns-btn kakao-tab">
                         <svg
                             class="sns-icon"
-                            xmlns="http://www.w3.org/2000/svg"
+                            xmlns="http://w3.org"
                             viewBox="0 0 24 24"
                         >
                             <path
@@ -170,7 +172,7 @@ const initialTheme = isSignUpRoute ? "cat" : "dog";
                     >
                         <svg
                             class="sns-icon"
-                            xmlns="http://www.w3.org/2000/svg"
+                            xmlns="http://w3.org"
                             viewBox="0 0 48 48"
                         >
                             <path
@@ -199,7 +201,7 @@ const initialTheme = isSignUpRoute ? "cat" : "dog";
                     >
                         <svg
                             class="sns-icon"
-                            xmlns="http://www.w3.org/2000/svg"
+                            xmlns="http://w3.org"
                             viewBox="0 0 24 24"
                         >
                             <path
