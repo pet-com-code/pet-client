@@ -1,83 +1,39 @@
 ---
 // src/components/Footer.astro
-
-const siteType = Astro.locals.siteType || "SHOP";
 const currentYear = new Date().getFullYear();
-
-// 교차 사이트 이동 링크 생성
-const DOMAIN_SHOP = import.meta.env.PUBLIC_DOMAIN_SHOP || "petshop";
-const DOMAIN_FIND = import.meta.env.PUBLIC_DOMAIN_FIND || "petfind";
-const isLocal = import.meta.env.DEV;
-
-const shopUrl = isLocal
-    ? `http://${DOMAIN_SHOP}:4321`
-    : `https://${DOMAIN_SHOP}.com`;
-const findUrl = isLocal
-    ? `http://${DOMAIN_FIND}:4321`
-    : `https://${DOMAIN_FIND}.com`;
 ---
 
 <footer class="site-footer">
     <div class="footer-container">
-        <!-- 1. 상단 약관 및 사이트 스위치 링크 -->
+        <!-- 1. 상단 약관 및 가이드 링크 -->
         <div class="footer-top">
             <ul class="terms-list">
                 <li><a href="/terms">이용약관</a></li>
                 <li>
                     <a href="/privacy" class="privacy-link">개인정보처리방침</a>
                 </li>
-                {
-                    siteType === "SHOP" ? (
-                        <>
-                            <li>
-                                <a href="/guide/shipping">배송/반품안내</a>
-                            </li>
-                            <li>
-                                <a href="/guide/shopping">쇼핑몰 이용안내</a>
-                            </li>
-                        </>
-                    ) : (
-                        <>
-                            <li>
-                                <a href="/guide/report">실종 제보 수칙</a>
-                            </li>
-                            <li>
-                                <a href="/guide/adopt">입양/분양 가이드</a>
-                            </li>
-                        </>
-                    )
-                }
+                <!-- [통합] 두 사이트의 가이드 링크를 모두 노출합니다 -->
+                <li><a href="/guide/shipping">배송/반품안내</a></li>
+                <li><a href="/guide/shopping">쇼핑몰 이용안내</a></li>
+                <li><a href="/guide/report">실종 제보 수칙</a></li>
+                <li><a href="/guide/adopt">입양/분양 가이드</a></li>
             </ul>
 
-            <!-- 패밀리 사이트 이동 버튼 -->
-            <a
-                href={siteType === "SHOP" ? findUrl : shopUrl}
-                class="family-site-btn"
-            >
-                {
-                    siteType === "SHOP"
-                        ? "🔍 찾아주기·분양 사이트 바로가기"
-                        : "🛍️ 펫줍 쇼핑몰 바로가기"
-                }
-            </a>
+            <!-- [삭제] 패밀리 사이트 이동 버튼은 사이트가 통합되었으므로 제거했습니다 -->
         </div>
 
         <!-- 2. 메인 정보 (고객센터 & 사업자 정보) -->
         <div class="footer-body">
-            <!-- CS 고객센터 섹션 -->
+            <!-- CS 통합 고객센터 섹션 -->
             <div class="cs-section">
-                <h3 class="section-title">
-                    {
-                        siteType === "SHOP"
-                            ? "🛒 쇼핑몰 고객센터"
-                            : "🚨 실종·제보 센터"
-                    }
-                </h3>
+                <!-- [통합] 고객센터 타이틀을 통합 명칭으로 변경 -->
+                <h3 class="section-title">📞 펫줍 통합 고객센터</h3>
                 <p class="cs-number">1588-0000</p>
                 <div class="cs-hours">
                     <p>운영시간: 평일 09:00 ~ 18:00 (점심시간 12:00 ~ 13:00)</p>
+                    <!-- [통합] 쇼핑몰 휴무 정보와 24시간 제보 가능 안내를 병합 -->
                     <p>
-                        주말 및 공휴일 휴무 (찾아주기 제보는 24시간 등록 가능)
+                        주말 및 공휴일 휴무 (단, 실종·제보 등록은 24시간 가능)
                     </p>
                     <p>이메일: help@petjup.com</p>
                 </div>
@@ -96,63 +52,49 @@ const findUrl = isLocal
                 </p>
                 <p>주소: 서울특별시 강남구 테헤란로 123 펫줍타워 5층</p>
 
-                {
-                    siteType === "SHOP" ? (
-                        <p class="legal-notice">
-                            (주)펫.닷컴은 통신판매중개자로서 통신판매의 당사자가
-                            아니며, 입점업체가 등록한 상품, 거래정보 및 거래에
-                            대해 책임을 지지 않습니다.
-                        </p>
-                    ) : (
-                        <p class="legal-notice">
-                            펫.닷컴 찾아주기·분양 서비스는 유기동물 보호 및
-                            무료/합법 분양 정보 매개 플랫폼으로, 허위 제보 및
-                            불법 매매 게시물 등록 시 관련 법률에 따라 처벌받을
-                            수 있습니다.
-                        </p>
-                    )
-                }
+                <!-- [통합] 두 서비스의 법적 고지문을 하나의 문단으로 자연스럽게 연결했습니다 -->
+                <p class="legal-notice">
+                    (주)펫.닷컴은 통신판매중개자로서 통신판매의 당사자가 아니며,
+                    입점업체가 등록한 상품, 거래정보 및 거래에 대해 책임을 지지
+                    않습니다. 더불어 펫줍 찾아주기·분양 서비스는 유기동물 보호
+                    및 무료/합법 분양 정보 매개 플랫폼으로, 허위 제보 및 불법
+                    매매 게시물 등록 시 관련 법률에 따라 처벌받을 수 있습니다.
+                </p>
             </div>
         </div>
 
         <!-- 3. 카피라이트 -->
         <div class="footer-bottom">
-            <p>© {currentYear} PETJOOP Corp. All rights reserved.</p>
+            <p>© {currentYear} PET Corp. All rights reserved.</p>
         </div>
     </div>
 </footer>
+
 <style>
     .site-footer {
-        width: 100%; /* 브라우저 좌우 끝까지 배경색을 채움 */
+        width: 100%;
         margin-top: auto;
         border-top: 1px solid var(--border-base-200, #e5e7eb);
         background-color: var(--bg-base-100, #ffffff);
         color: var(--text-base-content, #1f2937);
         opacity: 0.8;
-        font-size: 0.875rem; /* text-sm */
+        font-size: 0.875rem;
     }
 
+    /* 통합 푸터가 사용하는 단일 컨테이너 */
     .footer-container {
-        width: 100%;
-        max-width: 1200px; /* [핵심] 콘텐츠가 늘어날 수 있는 최대 폭 제한 */
-        margin-left: auto; /* [핵심] 좌측 마진 자동 계산으로 정중앙 배치 */
-        margin-right: auto; /* [핵심] 우측 마진 자동 계산으로 정중앙 배치 */
-        padding: 2.5rem 1.5rem; /* 좌우 패딩을 주어 양옆 화면에 붙지 않도록 방지 */
-        box-sizing: border-box; /* 패딩이 전체 너비에 영향을 주지 않도록 고정 */
-    }
-
-    .footer-container2 {
         width: 100%;
         max-width: 1200px;
         margin-left: auto;
         margin-right: auto;
-        padding: 2.5rem 1rem; /* py-10 px-4 */
+        padding: 2.5rem 1.5rem;
+        box-sizing: border-box;
     }
 
     @media (min-width: 1280px) {
         .footer-container {
             padding-left: 100px;
-            padding-right: 100px; /* xl:px-0 */
+            padding-right: 100px;
         }
     }
 
@@ -164,7 +106,7 @@ const findUrl = isLocal
         justify-content: space-between;
         gap: 1rem;
         border-bottom: 1px solid var(--border-base-200, #e5e7eb);
-        padding-bottom: 1.5rem; /* pb-6 */
+        padding-bottom: 1.5rem;
     }
 
     .terms-list {
@@ -174,7 +116,7 @@ const findUrl = isLocal
         list-style: none;
         margin: 0;
         padding: 0;
-        font-size: 0.75rem; /* text-xs */
+        font-size: 0.75rem;
         font-weight: 500;
     }
 
@@ -194,65 +136,45 @@ const findUrl = isLocal
 
     @media (min-width: 768px) {
         .terms-list {
-            gap: 1.5rem; /* md:gap-6 */
-            font-size: 0.875rem; /* md:text-sm */
+            gap: 1.5rem;
+            font-size: 0.875rem;
         }
     }
 
-    /* 패밀리 사이트 이동 버튼 */
-    .family-site-btn {
-        display: inline-flex;
-        align-items: center;
-        padding: 0 0.5rem;
-        height: 1.5rem; /* btn-xs 표준 높이 */
-        font-size: 0.75rem;
-        font-weight: 400;
-        text-decoration: none;
-        color: inherit;
-        border: 1px solid var(--border-base-300, #d1d5db);
-        border-radius: 9999px; /* rounded-full */
-        background-color: transparent;
-        transition: background-color 0.2s;
-    }
-
-    .family-site-btn:hover {
-        background-color: var(--bg-base-200, #f3f4f6);
-    }
-
-    /* 2. 메인 정보 영역 (항상 옆으로 나타나도록 고정) */
+    /* 2. 메인 정보 영역 */
     .footer-body {
         display: flex;
-        flex-direction: row; /* 무조건 가로로 배치 */
+        flex-direction: row;
         justify-content: space-between;
         align-items: flex-start;
-        gap: 2.5rem; /* 두 섹션 사이의 여백 */
+        gap: 2.5rem;
         padding-top: 2rem;
-        padding-bottom: 2rem; /* py-8 */
+        padding-bottom: 2rem;
     }
 
-    /* 좌측 CS 고객센터 섹션 */
+    /* 좌측 CS 통합 고객센터 섹션 */
     .cs-section {
-        flex: 0 0 30%; /* 전체 너비의 30% 고정 할당 */
-        min-width: 240px; /* 화면이 작아져도 글자가 깨지지 않도록 최소 너비 제한 */
+        flex: 0 0 30%;
+        min-width: 240px;
     }
 
     .cs-section .section-title {
         color: var(--text-base-content, #1f2937);
-        font-size: 1rem; /* text-base */
+        font-size: 1rem;
         font-weight: 700;
-        margin: 0 0 0.5rem 0; /* mb-2 */
+        margin: 0 0 0.5rem 0;
     }
 
     .cs-section .cs-number {
         color: var(--primary, #4b6bfb);
-        font-size: 1.5rem; /* text-2xl */
-        font-weight: 900; /* font-black */
+        font-size: 1.5rem;
+        font-weight: 900;
         margin: 0;
     }
 
     .cs-section .cs-hours {
         color: var(--text-base-content-70, #4b5563);
-        font-size: 0.75rem; /* text-xs */
+        font-size: 0.75rem;
         margin-top: 0.5rem;
     }
 
@@ -262,9 +184,9 @@ const findUrl = isLocal
 
     /* 우측 사업자 등록 정보 섹션 */
     .company-section {
-        flex: 1; /* 남은 공간을 모두 차지하도록 유연하게 설정 */
+        flex: 1;
         color: var(--text-base-content-70, #4b5563);
-        font-size: 0.75rem; /* text-xs */
+        font-size: 0.75rem;
     }
 
     .company-section p {
@@ -283,17 +205,17 @@ const findUrl = isLocal
 
     .company-section .legal-notice {
         color: var(--text-base-content-50, #9ca3af);
-        font-size: 11px; /* text-[11px] */
-        padding-top: 0.5rem; /* pt-2 */
+        font-size: 11px;
+        padding-top: 0.5rem;
         margin-top: 0.5rem;
     }
 
     /* 3. 하단 카피라이트 */
     .footer-bottom {
         border-top: 1px solid var(--border-base-200, #e5e7eb);
-        padding-top: 1.5rem; /* pt-6 */
+        padding-top: 1.5rem;
         text-align: center;
-        font-size: 0.75rem; /* text-xs */
+        font-size: 0.75rem;
         color: var(--text-base-content-50, #9ca3af);
     }
 
