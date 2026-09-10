@@ -5,6 +5,7 @@ import DesktopScreen from "@/com/screen/DesktopScreen.astro";
 import Header from "@/com/line/Header.astro";
 import Footer from "@/com/line/Footer.astro";
 import FilterBar from "@/com/search/FilterBar.astro";
+import IndexAD from "@/com/line/Index-AD.astro";
 
 const title = "Astro";
 const description = "Astro My....";
@@ -40,10 +41,7 @@ const isDebug = import.meta.env.PUBLIC_DEBUG_MODE === "true";
 <div id="main-content" class:list={[{ hidden: !isDebug }]}>
     <Header user={user} searchWidth={"600px"} searchHeight={"46px"} />
     <main>
-        <p>여기는 효과가 끝난 뒤 나타나는 1200px 너비의 메인 화면입니다.</p>
-        <div style="width: 728px;">
-            <FilterBar />
-        </div>
+        <IndexAD />
     </main>
     <Footer />
 </div>

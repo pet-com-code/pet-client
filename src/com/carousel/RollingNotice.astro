@@ -1,0 +1,199 @@
+---
+// src/components/RollingNotice.astro
+
+// 1. 공지사항 타입 정의
+interface NoticeItem {
+    title: string;
+    link: string;
+}
+
+// 2. 외부에서 받아올 props(속성) 정의
+interface Props {
+    notices: NoticeItem[];
+    width?: string; // 예: "100%", "400px" (기본값 "100%")
+    height?: string; // 예: "40px", "50px" (기본값 "40px")
+}
+
+const { notices = [], width = "100%", height = "40px" } = Astro.props;
+
+// 3. 페이지 내 여러 개가 존재할 때 스크립트가 꼬이지 않도록 고유 ID 발급
+const uniqueId = `notice-${Math.random().toString(36).substring(2, 9)}`;
+---
+
+<div
+    id={uniqueId}
+    class="rolling-notice-box"
+    style={{ width: width, height: height }}
+>
+    <div class="notice-viewport" style={{ height: height }}>
+        <ul class="notice-list">
+            {
+                notices.map((notice) => (
+                    <li
+                        class="notice-item"
+                        style={{ height: height, lineHeight: height }}
+                    >
+                        <a href={notice.link}>{notice.title}</a>
+                    </li>
+                ))
+            }
+        </ul>
+    </div>
+</div>
+
+<style>
+    /* 기본 레이아웃 스타일 (바깥 크기는 props style로 동적 제어) */
+    .rolling-notice-box {
+        overflow: hidden;
+        background-color: #f8f9fa;
+        border-radius: 8px;
+        border: 1px solid #e9ecef;
+        padding: 0 16px;
+        box-sizing: border-box;
+    }
+
+    .notice-viewport {
+        position: relative;
+        overflow: hidden;
+        width: 100%;
+    }
+
+    .notice-list {
+        position: relative;
+        margin: 0;
+        padding: 0;
+        list-style: none;
+        top: 0px;
+    }
+
+    .notice-item {
+        width: 100%;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        box-sizing: border-box;
+    }
+
+    .notice-item a {
+        text-decoration: none;
+        color: #333;
+        font-size: 14px;
+        font-weight: 500;
+        display: block;
+        width: 100%;
+        height: 100%;
+    }
+
+    .notice-item a:hover {
+        color: #0070f3;
+    }
+</style>
+
+<script define:vars={{ uniqueId, height }}>
+    // define:vars를 사용하면 Astro 서버의 변수(고유 ID, 높이)를 스크립트 내부로 안전하게 전달할 수 있습니다.
+
+    const initNoticeComponent = () => {
+        const container = document.getElementById(uniqueId);
+        if (!container) return;
+
+        const noticeList = container.querySelector(".notice-list");
+        const viewport = container.querySelector(".notice-viewport");
+
+        if (!noticeList || !viewport) return;
+
+        let noticeIndex = 0; // 현재 몇 번째 공지사항을 보여주고 있는지 기억하는 카운터입니다. (0부터 시작)
+        let noticeInterval = null; // 3초마다 공지를 올리는 타이머(setInterval)의 ID를 기억해 두는 곳입니다. (마우스 올리면 끄기 위해 필요
+
+        const noticeItems = noticeList.children;
+        const totalNoticeCount = noticeItems.length; // 진짜 공지사항이 총 몇 개인지 저장해 두는 변수
+
+        function initNotices() {
+            if (totalNoticeCount > 0) {
+                // 첫 번째 아이템 복제 후 맨 뒤에 붙이기 (무한 롤링)
+                const firstClone = noticeItems[0].cloneNode(true); // ① 첫 공지 복사
+                noticeList.appendChild(firstClone); // ② 맨 뒤에 붙이기
+
+                // [ 동작 원리 ] 공지가 [공지1, 공지2, 공지3] 세 개가 있다면, 첫 번째인 (공지1)을 복사해서
+                // 맨 뒤에 붙여 [공지1, 공지2, 공지3, 공지1(복사본)] 구조를 만듭니다.
+
+                // (이유) 마지막 (공지3)에서 다시 (공지1)로 넘어갈 때 아래에서 위로 스르륵 자연스럽게 올라가는
+                // 비주얼을 만들기 위해서입니다. 만약 복사본이 없다면 공지3에서 갑자기 아래 방향으로 뚝 떨어지며
+                // 첫 화면으로 돌아가 버립니다. "첫 번째 공지를 복사해 맨 뒤에 붙이고, 3초마다 높이만큼 위로 슬라이딩하다가,
+                // 마지막 복사본에 오면 사용자가 모르게 맨 앞으로 슉 순간이동시키는 똑똑한 트릭 전광판"
+
+                adjustHeight(); // 전광판 높이 동적 맞춤
+                startNoticeTimer(); // 타이머 가동, 롤링 애니메이션
+            }
+        }
+
+        // 스타일 맞춤 설정 (props로 전달받은 height 반영)
+        function adjustHeight() {
+            const rowHeight = parseInt(height, 10) || 40;
+            Array.from(noticeList.children).forEach((li) => {
+                li.style.height = `${rowHeight}px`;
+                li.style.lineHeight = `${rowHeight}px`;
+            });
+
+            // (동작 원리) 공지사항을 감싸는 박스(viewport)의 세로 높이를 가져와서, 모든 공지사항(li)의
+            // 높이와 줄 간격(lineHeight)을 그 높이에 딱 맞춰버립니다.
+
+            // (이유) 반응형 웹 디자인에서는 화면 크기에 따라 폰트나 여백이 미세하게 변할 수 있습니다.
+            // 그때마다 공지사항 한 칸의 크기도 자동으로 칼같이 맞춰주어 글자가 잘리거나 위아래로 어긋나는 걸 막아줍니다.
+        }
+
+        // 타이머 가동, 롤링 애니메이션
+        function startNoticeTimer() {
+            if (noticeInterval) clearInterval(noticeInterval);
+            if (totalNoticeCount === 0) return; // 공지사항이 없으면, 리턴
+
+            const rowHeight = parseInt(height, 10) || 40;
+
+            noticeInterval = setInterval(() => {
+                noticeIndex++; // 번호를 1 올립니다
+
+                // ① 위로 부드럽게 스크롤
+                noticeList.style.transition = "top 0.4s ease-in-out";
+                noticeList.style.top = `-${noticeIndex * rowHeight}px`;
+
+                if (noticeIndex === totalNoticeCount) {
+                    setTimeout(() => {
+                        noticeList.style.transition = "none"; // 애니메이션을 끄고
+                        noticeList.style.top = "0px"; // 순식간에 0px(진짜 1번)로 순간이동!
+                        noticeIndex = 0; // 인덱스도 0으로 리셋
+                    }, 400); // 0.4초 애니메이션이 완전히 끝난 직후 실행
+
+                    // (이동 공식) : -(noticeIndex * rowHeight)px 만큼 top값을 위로 올림
+                    // 마법의 눈속임(Reset): [공지3]을 지나 맨 뒤에 붙인 복사본 공지1(복사본)에 도달한 순간,
+                    // 사용자의 눈은 첫 번째 공지를 보고 있는 상태입니다.
+                    // a. 그 순간 애니메이션 시간(0.4초)이 지나자마자 트랜지션을 none으로 꺼버린 상태에서
+                    //    아주 빠르게 맨 처음 진짜 공지1 자리인 0px로 순간 이동시킵니다.
+                    // b. 트랜지션이 꺼져 있어서 움직임이 안 보이기 때문에, 사용자는 화면이 멈춘 채 계속 공지가
+                    //    이어지는 것처럼 느끼는 환상적인 무한 루프가 완성됩니다.
+                }
+            }, 3000);
+        }
+
+        // 마우스 오버 시 정지/재개
+        // 마우스를 올리면 타이머를 파괴해서 롤링을 일시정지합니다.
+        container.addEventListener("mouseenter", () => {
+            if (noticeInterval) {
+                clearInterval(noticeInterval);
+                noticeInterval = null;
+            }
+        });
+
+        // 마우스를 떼면 다시 타이머를 등록하여 롤링을 시작합니다.
+        container.addEventListener("mouseleave", startNoticeTimer);
+
+        // 공지사항 링크를 클릭하려고 마우스를 올렸는데 혼자 휙 넘어가 버리면 굉장히 짜증 나겠죠?
+        // 사용자가 글을 읽거나 클릭하려고 마우스를 대는 순간 타이머를 지우고(clearInterval),
+        // 마우스가 영역을 벗어나면 다시 startNoticeTimer를 실행시켜 굴러가게 만드는 배려 넘치는 기능입니다.
+
+        // 실행
+        initNotices();
+    };
+
+    // 실행 타이밍 조율
+    initNoticeComponent();
+    document.addEventListener("astro:after-swap", initNoticeComponent);
+</script>

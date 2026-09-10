@@ -1,0 +1,299 @@
+---
+interface Props {
+    width?: string; // 예: "100%", "1200px" (기본값 "100%")
+    height?: string; // 예: "480px" (기본값 "480px")
+}
+
+const { width = "100%", height = "480px" } = Astro.props;
+
+// 페이지 내 여러 캐러셀이 존재할 때 스크립트가 꼬이지 않도록 고유 ID 발급
+const uniqueId = `carousel-${Math.random().toString(36).substring(2, 9)}`;
+---
+
+<div
+    id={uniqueId}
+    class="carousel-view"
+    style={{ width: width, height: height }}
+>
+    <!-- 가로로 늘어선 슬라이드 기차 -->
+    <div class="carousel-list">
+        <slot />
+    </div>
+
+    <!-- 좌우 내비게이션 버튼 -->
+    <button type="button" class="nav-btn prev" aria-label="이전 슬라이드"
+        >❮</button
+    >
+    <button type="button" class="nav-btn next" aria-label="다음 슬라이드"
+        >❯</button
+    >
+
+    <!-- 하단 동적 인디케이터 구역 -->
+    <div class="indicators"></div>
+</div>
+<style>
+    /* ==========================================================================
+        CAROUSEL VIEWPORT SECTION (캐러셀 메인 뷰포트 구역)
+    ========================================================================== */
+    .carousel-view {
+        position: relative;
+        overflow: hidden;
+        border-radius: 16px;
+        box-shadow: var(--card-shadow);
+        background: var(--theme-bg-light);
+
+        /* [자식 1] 가로로 늘어선 슬라이드 레일 기차 */
+        .carousel-list {
+            display: flex;
+            width: 100%;
+            height: 100%;
+            transition: transform 0.6s cubic-bezier(0.25, 1, 0.5, 1);
+
+            /* 💡 외부 슬롯공간에서 주입되는 슬라이드 한 칸 크기를 100%로 강제 고정 */
+            :global(.carousel-item) {
+                min-width: 100%;
+                max-width: 100%;
+                height: 100%;
+                position: relative;
+                box-sizing: border-box;
+                flex-shrink: 0;
+            }
+        }
+
+        /* [자식 2] 내비게이션 버튼 공통 기능 */
+        .nav-btn {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+
+            /* 1. 반투명 배경 및 부드러운 흐림 효과 */
+            background: rgba(
+                255,
+                255,
+                255,
+                0.65
+            ); /* 0.85 -> 0.65로 낮춰 더 투명하게 설정 */
+            backdrop-filter: blur(
+                4px
+            ); /* 배경을 은은하게 흐리게 만들어 고급스러운 느낌 추가 */
+            border: none;
+
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            flex-shrink: 0; /* 👈 [필수] 주변 레이아웃 압박에 버튼이 찌그러지는 것을 완벽 차단 */
+
+            /* 3. 중앙 정렬 및 가독성 개선 */
+            display: flex; /* 화살표 텍스트가 정확히 중앙에 오도록 flex 설정 */
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            z-index: 10;
+            color: var(--text-main);
+            transition: all 0.25s ease;
+
+            /* 버튼 마우스 호버 물리 효과 연출 */
+            &:hover {
+                background: rgba(
+                    255,
+                    255,
+                    255,
+                    0.95
+                ); /* 호버 시에는 투명도를 없애 선명하게 부각 */
+                transform: translateY(-50%) scale(1.08); /* 중앙 정렬 축 유지하며 확대 */
+                color: var(
+                    --theme-main
+                ); /* 👈 호버 시 블루/핑크 포인트 컬러 피드백 */
+                box-shadow: var(--card-shadow-hover);
+            }
+
+            /* 버튼 개별 좌우 배치 축 정렬 */
+            &.prev {
+                left: 20px;
+            }
+            &.next {
+                right: 20px;
+            }
+        }
+
+        /* [자식 3] 하단 인디케이터 포지셔닝 */
+        .indicators {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 8px;
+            z-index: 10;
+
+            /* 자바스크립트 스크립트가 동적으로 생성할 닷(dot) 스타일 */
+            :global(.dot) {
+                width: 8px;
+                height: 8px;
+                background: rgba(255, 255, 255, 0.45);
+                border-radius: 50%;
+                cursor: pointer;
+                transition: all 0.3s ease;
+
+                /* 활성화된 현재 슬라이드 인디케이터 바(Bar) 연출 */
+                &.active {
+                    background: var(
+                        --theme-main
+                    ); /* 👈 활성화된 슬라이드 바 색상 자동 전환 */
+                    width: 22px;
+                    border-radius: 10px;
+                }
+            }
+        }
+    }
+</style>
+
+<script define:vars={{ uniqueId }}>
+    const initCarouselComponent = () => {
+        const container = document.getElementById(uniqueId);
+        if (!container) return;
+
+        const view = container;
+        const list = container.querySelector(".carousel-list"); // div 모음
+        const prevBtn = container.querySelector(".prev");
+        const nextBtn = container.querySelector(".next");
+        const indicatorContainer = container.querySelector(".indicators");
+
+        if (!view || !list || !indicatorContainer) return;
+
+        const slides = list.children; // slide List
+        const totalSlides = slides.length; // slide 개수
+        if (totalSlides === 0) return; // slide가 없으면, 리턴
+
+        let currentIndex = 0; // 처음 시작 위치
+        let autoPlayInterval = null; // 지나가는 속도
+        let resizeTimeout = null;
+
+        // 🔍 슬라이드 개수에 맞게 인디케이터(닷)를 스크립트로 동적 생성합니다.
+        indicatorContainer.innerHTML = "";
+        for (let i = 0; i < totalSlides; i++) {
+            const dot = document.createElement("span");
+            dot.classList.add("dot");
+            if (i === 0) dot.classList.add("active");
+            dot.setAttribute("data-index", i.toString());
+            indicatorContainer.appendChild(dot);
+        }
+        const dots = indicatorContainer.querySelectorAll(".dot");
+
+        // 실제 화면을 움직이고 표시를 업데이트하는 사령탑(컨트롤러)
+        // 버튼을 누르든 4초 타이머가 돌든, 모든 슬라이드 이동의 최종 종착지는 결국 이 함수
+
+        function updateSlide() {
+            // 캐러셀의 뼈대인 뷰포트 영역(view)이나 실제 슬라이드 목록(list)이 HTML 상에 존재하는지 검사합니다.
+            // 만약 HTML 파일에 해당 ID가 없는 엉뚱한 페이지에서 이 스크립트가 로드된다면, 존재하지 않는 요소를
+            // 조작하려다가 웹 브라우저가 에러를 뿜으며 멈춥니다. 이 한 줄 덕분에 요소가 없으면 조용히 함수를
+            // 종료(return)하여 에러를 막아줍니다.
+            if (!view || !list) return;
+
+            // 슬라이드의 너비를 자동으로 변경
+            // 브라우저 화면에 실제 표시되고 있는 캐러셀 박스(view)의 순수한 가로 너비(px)를
+            // 실시간으로 측정하여 slideWidth라는 상수에 담습니다.
+            // 사용자 브라우저 크기가 1200px이든, 800px이든 상관없이 현재 눈에 보이는 정확한
+            // 화면 크기만큼만 슬라이드를 밀어주어야 화면이 어긋나지 않기 때문입니다.
+
+            const slideWidth = view.clientWidth;
+
+            // 수학 공식을 이용한 슬라이드 이동 (CSS 조작)
+            // (기능) 슬라이드 전체 리스트(list)를 왼쪽(마이너스 방향)으로 부드럽게 밀어버리는 CSS 속성을 동적으로 주입합니다.
+
+            // [ 계산의 원리 ]  현재 슬라이드 번호(currentIndex)
+            // currentIndex = 0 : 0 * 700px = 0px => 이동 없음 (첫 화면)
+            // currentIndex = 1 : 1 * 700px = -700px => 왼쪽으로 700px만큼 이동
+            // currentIndex = 2 : 2 * 700px = -1400px => 왼쪽으로 1400px만큼 이동
+            // 이 공식을 통해 백엔드나 CSS 조작 없이 단 한 줄로 정확한 칸으로 슬라이드를 이동시킵니다.
+            // (CSS에 transition: transform이 걸려 있다면 이 변화 과정이 스르륵 흐르듯 보이게 됩니다.)
+
+            list.style.transform = `translateX(-${currentIndex * slideWidth}px)`;
+
+            // 하단 닷(dots) 버튼 활성화 상태 업데이트
+            // (기능) 화면 아래에 있는 동그라미 버튼들(dots) 중 현재 보고 있는 슬라이드 순서에 맞는
+            // 동그라미만 파랗게(active) 강조하고, 나머지는 원래대로 되돌립니다.
+
+            dots.forEach((dot, index) => {
+                dot.classList.toggle("active", index === currentIndex);
+
+                // dots.forEach((dot, index) => { ... })
+                // 동그라미 버튼들을 0번부터 끝 번호까지 하나씩 순서대로 꺼냅니다. (index는 0, 1, 2...)
+
+                // dot.classList.toggle("클래스명", 조건):
+                // a. 자바스크립트의 아주 편리한 문법입니다. 조건이 true이면 클래스를 추가하고,
+                //    false이면 클래스를 제거합니다.
+                // b. 즉, 현재 꺼내진 동그라미의 번호(index)와 현재 슬라이드 번호(currentIndex)가 일치하는
+                //    단 한 녀석에게만 active 클래스를 주고, 나머지는 전부 뺏는 동작을 눈 깜짝할 사이에 수행하는 것입니다.
+            });
+        }
+
+        function nextSlide() {
+            currentIndex = (currentIndex + 1) % totalSlides;
+            updateSlide();
+        }
+
+        function prevSlide() {
+            currentIndex = (currentIndex - 1 + totalSlides) % totalSlides;
+            updateSlide();
+        }
+
+        function startAutoPlay() {
+            stopAutoPlay();
+            autoPlayInterval = setInterval(nextSlide, 4000);
+        }
+
+        function stopAutoPlay() {
+            if (autoPlayInterval) {
+                clearInterval(autoPlayInterval);
+                autoPlayInterval = null;
+            }
+        }
+
+        if (nextBtn) {
+            nextBtn.addEventListener("click", () => {
+                nextSlide();
+                startAutoPlay();
+            });
+        }
+
+        if (prevBtn) {
+            prevBtn.addEventListener("click", () => {
+                prevSlide();
+                startAutoPlay();
+            });
+        }
+
+        dots.forEach((dot) => {
+            dot.addEventListener("click", (e) => {
+                const target = e.target;
+                const indexAttr = target.getAttribute("data-index");
+                if (indexAttr !== null) {
+                    currentIndex = parseInt(indexAttr, 10);
+                    updateSlide();
+                    startAutoPlay();
+                }
+            });
+        });
+
+        view.addEventListener("mouseenter", stopAutoPlay);
+        view.addEventListener("mouseleave", startAutoPlay);
+
+        window.addEventListener("resize", () => {
+            if (resizeTimeout) {
+                // 혹은 resizeTimeout이 null이 아닐 때
+                // window 객체를 명시해주면 브라우저 환경에서 number 타입으로 정확히 작동합니다.
+                window.clearTimeout(resizeTimeout);
+            }
+
+            // window.setTimeout으로 실행하여 number 타입을 반환하도록 명시
+            resizeTimeout = window.setTimeout(updateSlide, 100);
+        });
+
+        updateSlide();
+        startAutoPlay();
+    };
+
+    initCarouselComponent();
+    document.addEventListener("astro:after-swap", initCarouselComponent);
+</script>
