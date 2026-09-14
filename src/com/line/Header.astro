@@ -3,7 +3,7 @@ import { Image } from "astro:assets";
 import ImgLogo from "@/assets/img/petIcon.png";
 
 import ThemeToggle from "@/com/theme/ThemeToggleCSS.astro";
-import SearchInput from "@/com/search/MainSearch.astro";
+import SearchInput from "@/com/search/SearchBreeds.astro";
 
 // 1. 부모(페이지)로부터 넘겨받을 변수들의 타입을 정의합니다.
 interface Props {
@@ -157,7 +157,8 @@ console.log("[ HOME ]에서 확인한 로그인 상태:", isLoggedIn, "유저 �
         list-style: none;
         width: 100%;
         font-size: 1rem; /* text-base */
-        font-weight: bold;
+        font-weight: light; /* 자동으로 Maplestory-Bold가 매칭됩니다 */
+        font-family: var(--font-title); /* 👈 이 한 줄을 추가하세요 */
     }
 
     .sub-nav-menu a {

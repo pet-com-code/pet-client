@@ -243,18 +243,18 @@ const { searchWidth = "800px", searchHeight = "46px" } = Astro.props;
             try {
                 /*
                     환경별 API 서버 주소 자동 분기
-                    const baseUrl = window.location.hostname.includes("localhost")
-                        ? "http://localhost:8787"
-                        : "https://petjup.com";
-
-                    const response = await fetch(
-                        `${baseUrl}/api/search/breeds?q=${encodeURIComponent(keyword)}`
-                    );
-                */
+                    */
+                const baseUrl = window.location.hostname.includes("localhost")
+                    ? "http://localhost:8787"
+                    : "https://petjup.com";
 
                 const response = await fetch(
-                    `https://petjup.com/api/search/breeds-all?q=${encodeURIComponent(keyword)}`
+                    `${baseUrl}/api/search/breeds-all?q=${encodeURIComponent(keyword)}`
                 );
+
+                // const response = await fetch(
+                //     `https://petjup.com/api/search/breeds-all?q=${encodeURIComponent(keyword)}`
+                // );
                 if (!response.ok) throw new Error("API Network error");
 
                 const results = await response.json();

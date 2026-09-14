@@ -1,0 +1,562 @@
+---
+// FilterBar.astro
+
+// 1. 타입 인터페이스 정의
+interface OptionItem {
+    code: string;
+    name: string;
+}
+
+interface FilterGroup {
+    id: string; // Form field name (예: ageStage, formulation 등)
+    label: string; // 선택창 기본 라벨
+    options: OptionItem[];
+}
+
+interface CategoryFilterSchema {
+    [categoryCode: string]: FilterGroup[];
+}
+
+// 2. 기본 고정 옵션
+const PET_OPTIONS: OptionItem[] = [
+    { code: "DG", name: "🐶 강아지 (Dog)" }, // D -> DG로 표준화
+    { code: "CT", name: "🐱 고양이 (Cat)" } // C -> CT로 표준화
+];
+
+const CATEGORY_OPTIONS: OptionItem[] = [
+    { code: "FO", name: "🍲 사료 (Food)" },
+    { code: "SN", name: "🍖 간식 (Snack)" },
+    { code: "TY", name: "🧸 장난감 (Toy)" },
+    { code: "CL", name: "👕 의류 (Clothes)" },
+    { code: "SU", name: "🧼 용품 (Supplies)" } // SP -> SU로 체계 통일
+];
+
+// 3. 카테고리별 세분화 필터 스키마 정의 (디자인된 SKU 체계 반영)
+const CATEGORY_FILTER_SCHEMA: CategoryFilterSchema = {
+    // 🍲 사료 세부 필터 (4개 드롭다운)
+    FO: [
+        {
+            id: "growthStage",
+            label: "🍼 성장 단계",
+            options: [
+                { code: "PP", name: "퍼피/키튼 (영유아)" },
+                { code: "AD", name: "어덜트 (성견/성묘)" },
+                { code: "SR", name: "시니어 (7세 이상)" }
+            ]
+        },
+        {
+            id: "formulation",
+            label: "🥣 제형",
+            options: [
+                { code: "DR", name: "건식" },
+                { code: "WT", name: "습식/캔/파우치" },
+                { code: "BK", name: "화식" },
+                { code: "FD", name: "동결건조" }
+            ]
+        },
+        {
+            id: "care",
+            label: "🏥 케어 기능",
+            options: [
+                { code: "JT", name: "관절/뼈" },
+                { code: "SK", name: "피부/모질/알러지" },
+                { code: "WG", name: "체중조절/다이어트" },
+                { code: "DG", name: "소화/장" },
+                { code: "GE", name: "일반/해당없음" }
+            ]
+        },
+        {
+            id: "ingredients",
+            label: "🥩 주원료",
+            options: [
+                { code: "CH", name: "닭고기" },
+                { code: "SA", name: "연어/해산물" },
+                { code: "BE", name: "소고기" },
+                { code: "DU", name: "오리고기" },
+                { code: "LA", name: "양고기" },
+                { code: "VE", name: "야채/과일" }
+            ]
+        }
+    ],
+    // 🍖 간식 세부 필터
+    SN: [
+        {
+            id: "formulation",
+            label: "🍡 간식 제형",
+            options: [
+                { code: "JE", name: "육포/져키" },
+                { code: "CH", name: "껌/츄" },
+                { code: "WT", name: "츄르/습식/스틱형" },
+                { code: "FD", name: "동결건조/트릿" },
+                { code: "BK", name: "베이커리/비스킷" }
+            ]
+        },
+        {
+            id: "care",
+            label: "🏥 케어 기능",
+            options: [
+                { code: "JT", name: "관절/뼈" },
+                { code: "SK", name: "피부/모질/알러지" },
+                { code: "WG", name: "체중조절/다이어트" },
+                { code: "DG", name: "소화/장" },
+                { code: "GE", name: "일반/해당없음" }
+            ]
+        },
+        {
+            id: "ingredients",
+            label: "🥕 주원료",
+            options: [
+                { code: "CH", name: "닭고기" },
+                { code: "SA", name: "연어/해산물" },
+                { code: "BE", name: "소고기" },
+                { code: "DU", name: "오리고기" },
+                { code: "LA", name: "양고기" },
+                { code: "VE", name: "야채/과일" }
+            ]
+        }
+    ],
+    // 🧸 장난감 세부 필터
+    TY: [
+        {
+            id: "playType",
+            label: "🎯 놀이 유형",
+            options: [
+                { code: "PL", name: "봉제/인형 (Plush)" },
+                { code: "CH", name: "치어링/터그/치석제거 (Chew)" },
+                { code: "FT", name: "낚싯대/깃털 (Feather)" },
+                { code: "IQ", name: "노즈워크/지능개발 (Puzzle)" },
+                { code: "BL", name: "공/바운스 (Ball)" }
+            ]
+        },
+        {
+            id: "material",
+            label: "🪵 소재",
+            options: [
+                { code: "FA", name: "패브릭/천" },
+                { code: "RU", name: "고무/라텍스" },
+                { code: "WO", name: "우드/자연소재" },
+                { code: "PL", name: "플라스틱/PP" }
+            ]
+        }
+    ],
+    // 👕 의류 세부 필터
+    CL: [
+        {
+            id: "style",
+            label: "👗 의류 종류",
+            options: [
+                { code: "TS", name: "티셔츠/맨투맨" },
+                { code: "OT", name: "아우터/패딩/코트" },
+                { code: "OP", name: "원피스/올인원" },
+                { code: "RA", name: "레인코트" },
+                { code: "AC", name: "액세서리(모자/스카프)" }
+            ]
+        },
+        {
+            id: "size",
+            label: "📏 사이즈",
+            options: [
+                { code: "XS", name: "XS" },
+                { code: "SM", name: "S" },
+                { code: "MD", name: "M" },
+                { code: "LG", name: "L" },
+                { code: "XL", name: "XL" },
+                { code: "2X", name: "XXL" },
+                { code: "FR", name: "FREE" }
+            ]
+        },
+        {
+            id: "color",
+            label: "🎨 색상",
+            options: [
+                { code: "RD", name: "🔴 Red" },
+                { code: "BL", name: "🔵 Blue" },
+                { code: "YL", name: "🟡 Yellow" },
+                { code: "PK", name: "🌸 Pink" },
+                { code: "BK", name: "⚫ Black" },
+                { code: "WT", name: "⚪ White" },
+                { code: "GR", name: "🩶 Gray" },
+                { code: "BG", name: "🟤 Beige" }
+            ]
+        }
+    ],
+    // 🧼 용품 세부 필터
+    SU: [
+        {
+            id: "usage",
+            label: "💡 용품 분류",
+            options: [
+                { code: "HY", name: "배변/위생 (패드/기저귀)" },
+                { code: "LT", name: "고양이 모래/화장실" },
+                { code: "GR", name: "미용/목욕 (샴푸/브러시)" },
+                { code: "WT", name: "식기/급수기" },
+                { code: "WA", name: "산책/외출 (하네스/이동장)" }
+            ]
+        },
+        {
+            id: "feature",
+            label: "⚙️ 제품 형태/특징",
+            options: [
+                { code: "AT", name: "자동/기계식" },
+                { code: "PO", name: "휴대용/접이식" },
+                { code: "WA", name: "세척가능/방수" },
+                { code: "NS", name: "저소음/무소음" },
+                { code: "ST", name: "스탠다드/일반형" }
+            ]
+        }
+    ]
+};
+---
+
+<div class="filter-bar-card shadow-card">
+    <form
+        id="filter-search-form"
+        action="/search"
+        method="GET"
+        class="filter-form"
+    >
+        <!-- 1단계: 메인 선택 바 (동물, 카테고리) -->
+        <div class="main-filter-bar">
+            <!-- 대상 동물 -->
+            <div class="form-control animal-control">
+                <select name="targetPet" class="select-field" required>
+                    <option value="" disabled selected>동물 선택</option>
+                    {
+                        PET_OPTIONS.map((opt: OptionItem) => (
+                            <option value={opt.code}>{opt.name}</option>
+                        ))
+                    }
+                </select>
+            </div>
+
+            <!-- 카테고리 -->
+            <div class="form-control category-control">
+                <select
+                    id="bar-select-category"
+                    name="category"
+                    class="select-field"
+                    required
+                >
+                    <option value="" disabled selected>카테고리 선택</option>
+                    {
+                        CATEGORY_OPTIONS.map((opt: OptionItem) => (
+                            <option value={opt.code}>{opt.name}</option>
+                        ))
+                    }
+                </select>
+            </div>
+
+            <!-- 검색 버튼 -->
+            <div class="search-btn-container">
+                <button type="submit" class="search-button btn-theme">
+                    <svg
+                        xmlns="http://w3.org"
+                        class="search-icon"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                    >
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                        ></path>
+                    </svg>
+                    검색
+                </button>
+            </div>
+        </div>
+
+        <!-- 2단계: 동적으로 생성되는 세부 필터 수신 컨테이너 -->
+        <div id="dynamic-subfilters-container" class="subfilters-container">
+            <div class="placeholder-text">
+                카테고리를 선택하시면 세부 필터가 표시됩니다.
+            </div>
+        </div>
+    </form>
+</div>
+
+<!-- ==========================================
+    자바스크립트 로직(안전한 주소 조립 및 동적 렌더링)
+========================================== -->
+<script is:inline define:vars={{ CATEGORY_FILTER_SCHEMA }}>
+    function initFilterBar() {
+        // 1. 필요한 DOM 엘리먼트 추출
+        const form = document.getElementById("filter-search-form");
+        const catSelect = document.getElementById("bar-select-category");
+        const subContainer = document.getElementById(
+            "dynamic-subfilters-container"
+        );
+
+        // 필수 엘리먼트가 없으면 로직을 실행하지 않고 종료
+        if (!catSelect || !subContainer || !form) return;
+
+        /**
+         * [폼 서브밋 이벤트 핸들러]
+         * 기본 submit 동작을 제한하고, 선택된 유효값만 쿼리 스트링으로 가공해 주소를 이동합니다.
+         * 예: /search?targetPet=DG&category=FO&growthStage=PP
+         */
+        form.onsubmit = function (event) {
+            event.preventDefault(); // 주소창이 새로고침 되며 먹통이 되는 기본 전송 차단
+
+            const formData = new FormData(form);
+            const params = new URLSearchParams();
+
+            // 폼 내부의 모든 선택 필드를 돌며 빈 값이 아닌 것만 파라미터에 추가
+            for (const [key, value] of formData.entries()) {
+                if (value && value.trim() !== "") {
+                    params.append(key, value);
+                }
+            }
+
+            // 완성된 깔끔한 주소 쿼리를 가지고 페이지 직접 이동
+            const actionUrl = form.getAttribute("action") || "/search";
+            window.location.href = `${actionUrl}?${params.toString()}`;
+        };
+
+        /**
+         * [카테고리 변경 이벤트 핸들러]
+         * 사료, 간식, 의류 등 대분류를 선택할 때마다 하위 세부 필터 드롭다운을 동적으로 생성합니다.
+         */
+        catSelect.onchange = function () {
+            const selectedCat = catSelect.value;
+            const schemaList = CATEGORY_FILTER_SCHEMA[selectedCat] || [];
+
+            // 세부 필터 컨테이너 내부 초기화
+            subContainer.innerHTML = "";
+
+            // 선택된 카테고리에 세부 스키마(옵션)가 없다면 안내 문구 출력 후 종료
+            if (schemaList.length === 0) {
+                subContainer.innerHTML =
+                    "카테고리를 선택하시면 세부 필터가 표시됩니다.";
+                return;
+            }
+
+            // 전달받은 스키마 리스트를 순회하며 select 박스 생성 및 추가
+            schemaList.forEach((group) => {
+                const wrapper = document.createElement("div");
+                wrapper.className = "dynamic-form-control";
+
+                // 개별 드롭다운 HTML 조립 (id를 name 속성으로 매핑)
+                let selectHtml = `<select name="${group.id}" class="select-field">`;
+                selectHtml += `<option value="">전체 (${group.label})</option>`;
+
+                // 하위 옵션들 루프 생성
+                group.options.forEach((opt) => {
+                    selectHtml += `<option value="${opt.code}">${opt.name}</option>`;
+                });
+
+                selectHtml += `</select>`;
+                wrapper.innerHTML = selectHtml;
+
+                // 컨테이너에 동적 생성된 필터 삽입
+                subContainer.appendChild(wrapper);
+            });
+        };
+    }
+
+    // 일반적인 웹 브라우저 로드 완료 시점 및 Astro View Transitions 생명주기에 모두 대응
+    document.addEventListener("DOMContentLoaded", initFilterBar);
+    document.addEventListener("astro:page-load", initFilterBar);
+</script>
+
+<style is:global>
+    /**
+     * [1] 메인 카드 컨테이너
+     * 전체 필터 바의 외곽 틀을 잡는 핵심 영역입니다.
+     * 728x90 규격에 맞춰 높이를 딱 90px로 제한하고, 내부 요소들이 세로 정중앙에 정렬되도록 구성했습니다.
+     */
+    .filter-bar-card {
+        width: 100%; /* 부모 요소의 너비에 맞춰 꽉 차게 설정 */
+        height: 90px; /* 728x90 배너 규격 고정을 위한 고정 높이 */
+        margin: 0 auto; /* 화면 중앙 정렬 */
+        border-radius: 0.5rem; /* 모서리를 부드럽게 라운딩 처리 (8px) */
+        padding: 4px 10px; /* 좁은 높이 내에서 요소가 끼이지 않도록 여백 다이어트 */
+        box-sizing: border-box; /* 패딩과 테두리가 전체 높이(90px)에 포함되도록 설정 */
+
+        /* 내부 요소를 위아래로 쌓고 세로 정중앙 정렬 */
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+
+        /* Tailwind나 기존 사이트의 테마 컬러(배경, 테두리)를 강제로 연동 */
+        background-color: var(--color-base-100) !important;
+        border: 1px solid var(--color-base-200) !important;
+
+        /* 다크모드 전환 시 부드러운 색상 변화를 위한 애니메이션 효과 */
+        transition:
+            background-color 0.3s ease,
+            border-color 0.3s ease,
+            box-shadow 0.2s ease;
+    }
+
+    /**
+     * [2] 폼 컴포넌트 간격
+     * 1단계 메인 필터 바와 2단계 동적 세부 필터 레이어 사이의 미세한 간격을 조정합니다.
+     */
+    .filter-form {
+        width: 100%;
+    }
+
+    /* 폼 내부의 바로 다음 자식 요소 사이에만 4px의 상단 여백을 줌 */
+    .filter-form > * + * {
+        margin-top: 4px;
+    }
+
+    /**
+     * [3] 1단계 메인 필터 바 레이아웃
+     * 동물 선택, 카테고리 선택, 검색 버튼을 한 줄로 나란히 배치합니다.
+     */
+    .main-filter-bar {
+        display: flex;
+        width: 100%;
+        flex-direction: row; /* 가로 방향으로 정렬 */
+        align-items: center; /* 요소들의 세로 기준점을 정중앙으로 일치 */
+        gap: 6px; /* 요소 사이의 간격을 6px로 좁게 유지 */
+    }
+
+    /* 레이아웃 오작동 방지를 위한 기본 박스 모델 선언 */
+    .form-control {
+        box-sizing: border-box;
+    }
+
+    /* 동물 선택과 카테고리 선택 상자가 화면이 늘어나도 140px 고정 크기를 유지하도록 제어 */
+    .animal-control,
+    .category-control {
+        width: 140px;
+        flex-shrink: 0; /* 공간이 좁아져도 select 박스가 찌그러지지 않음 */
+    }
+
+    /**
+     * [4] 셀렉트 박스 (드롭다운) 공통 디자인
+     * 높이를 32px로 대폭 줄여서 전체 90px 공간 안에 2줄의 필터가 여유 있게 들어가도록 설계했습니다.
+     */
+    .filter-bar-card .select-field {
+        width: 100%;
+        height: 32px; /* 컴팩트한 다이어트 높이 */
+        padding: 0 6px; /* 좌우 글자 여백 확보 */
+        font-size: 13px; /* 가독성을 해치지 않는 선에서 작은 폰트 적용 */
+        box-sizing: border-box;
+        border-radius: 4px; /* 셀렉트 박스 모서리 라운딩 */
+
+        /* 테마 시스템의 글자색, 배경색, 테두리선 강제 결합 */
+        color: var(--color-base-content) !important;
+        background-color: var(--color-base-100) !important;
+        border: 1px solid var(--color-base-200) !important;
+
+        transition:
+            border-color 0.2s ease,
+            box-shadow 0.2s ease,
+            background-color 0.3s ease,
+            color 0.3s ease;
+    }
+
+    /* 셀렉트 박스를 클릭하여 포커스가 잡혔을 때의 하이라이트 효과 */
+    .filter-bar-card .select-field:focus {
+        outline: none !important; /* 브라우저 기본 파란색 아웃라인 제거 */
+        border-color: var(
+            --color-primary
+        ) !important; /* 쇼핑몰 대표 포인트 컬러로 테두리 변경 */
+        /* 포인트 컬러를 20% 투명하게 믹스하여 은은한 후광(Glow) 효과 연동 */
+        box-shadow: 0 0 0 2px
+            color-mix(in srgb, var(--color-primary) 20%, transparent) !important;
+    }
+
+    /**
+     * [5] 자바스크립트로 추가되는 동적 필터의 블록화
+     * 스크립트가 `<select>`를 생성하고 밀어 넣을 때, 그리드 레이아웃 안에서 온전한 크기를 갖추도록 합니다.
+     */
+    .subfilters-container .dynamic-form-control {
+        width: 100%;
+        box-sizing: border-box;
+        display: block;
+    }
+
+    /**
+     * [6] 검색 버튼 및 컨테이너
+     * 버튼을 항상 우측 끝에 밀착시키고, 브랜드 컬러를 입힙니다.
+     */
+    .search-btn-container {
+        margin-left: auto; /* flex 레이아웃 안에서 이 요소를 우측 끝으로 밀어냄 */
+    }
+
+    .search-button {
+        display: flex;
+        align-items: center; /* 돋보기 아이콘과 '검색' 텍스트 세로 중앙 정렬 */
+        justify-content: center;
+        gap: 4px; /* 아이콘과 텍스트 사이 간격 4px */
+        height: 32px; /* 셀렉트 박스와 높이를 32px로 일치 */
+        padding: 0 16px; /* 버튼 좌우 볼륨감 제공 */
+        font-size: 13px;
+        font-weight: 700; /* 글씨를 두껍게 하여 가시성 확보 */
+        white-space: nowrap; /* 글자가 화면 안에서 줄바꿈되는 현상 절대 방지 */
+        border-radius: 4px;
+        border: none;
+        cursor: pointer; /* 마우스를 올렸을 때 손가락 모양으로 변경 */
+        box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.04); /* 미세한 하단 입체 그림자 */
+
+        /* 쇼핑몰 메인 프라이머리 컬러와 버튼 전용 글자색 반영 */
+        background-color: var(--color-primary) !important;
+        color: var(--color-primary-content) !important;
+        transition:
+            background-color 0.2s ease,
+            color 0.2s ease;
+    }
+
+    /* 버튼 위에 마우스를 올렸을 때 약간 어두워지거나 지정된 호버 컬러로 변경 */
+    .search-button:hover {
+        background-color: var(--custom-hover) !important;
+    }
+
+    /* 돋보기 SVG 아이콘 크기 고정 */
+    .search-icon {
+        width: 12px;
+        height: 12px;
+    }
+
+    /**
+     * [7] 2단계: 동적 세부 필터 그리드 레이아웃
+     * 대분류 선택 시 하단에 펼쳐지는 세부 조건 영역입니다.
+     * 사료 기준 4개의 드롭다운(`성장단계`, `제형`, `케어`, `주원료`)이 가로로 균등하게 쪼개지도록 4열 그리드를 적용했습니다.
+     */
+    .subfilters-container {
+        display: grid;
+        grid-template-columns: repeat(
+            4,
+            minmax(0, 1fr)
+        ); /* 정확히 4등분 균등 분할 */
+        gap: 6px; /* 세부 필터 간격 6px */
+        padding-top: 4px; /* 상단 경계선과의 여백 */
+        min-height: 32px; /* 필터가 비어있어도 최소 높이를 유지하여 덜컹거림 방지 */
+        position: relative;
+        border-top: 1px solid var(--border-base-200); /* 1단계 필터와의 구분을 위한 경계선 */
+        box-sizing: border-box;
+    }
+
+    /**
+     * [8] 안내 메시지 플레이스홀더
+     * 아직 카테고리를 선택하지 않았을 때 "카테고리를 선택하시면..." 문구를 띄워주는 점선 상자 영역입니다.
+     */
+    .subfilters-container .placeholder-text {
+        grid-column: 1 / -1; /* 4열 그리드 전체를 가로로 길게 병합 (colspan 역할) */
+        display: flex;
+        align-items: center; /* 텍스트 정중앙 배치 */
+        justify-content: center;
+        font-size: 11px;
+        text-align: center;
+        height: 32px;
+        border-radius: 4px;
+        box-sizing: border-box;
+
+        color: var(--color-base-content);
+        opacity: 0.6; /* 글자를 연하게 처리 */
+        border: 1px dashed var(--border-base-200); /* 점선 테두리 처리 */
+        background-color: var(--color-base-200); /* 약간 어두운 미색 배경 */
+    }
+
+    /* CSS 최신 문법(:has) 활용: 세부 필터(.dynamic-form-control)가 하나라도 추가되면 플레이스홀더를 자동으로 숨김 */
+    .subfilters-container:has(.dynamic-form-control) .placeholder-text {
+        display: none !important;
+    }
+</style>

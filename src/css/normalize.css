@@ -4,11 +4,12 @@
 /* Pretendard CDN */
 @import url("https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css");
 
-/* Maplestory 폰트 (로컬 파일 또는 CDN) */
+/* ==========================================================================
+   1. 로컬 Maplestory 폰트 정의 (CDN 제거 후 로컬 경로 적용)
+   ========================================================================== */
 @font-face {
     font-family: "Maplestory";
-    src: url("https://fastly.jsdelivr.net/gh/projectnoonnu/noonfonts_20-04@2.1/MaplestoryOTFLight.woff")
-        format("woff");
+    src: url("../assets/fonts/Maplestory-Light.woff2") format("woff2");
     font-weight: 400;
     font-style: normal;
     font-display: swap;
@@ -16,8 +17,7 @@
 
 @font-face {
     font-family: "Maplestory";
-    src: url("https://fastly.jsdelivr.net/gh/projectnoonnu/noonfonts_20-04@2.1/MaplestoryOTFBold.woff")
-        format("woff");
+    src: url("../assets/fonts/Maplestory-Bold.woff2") format("woff2");
     font-weight: 700;
     font-style: normal;
     font-display: swap;
